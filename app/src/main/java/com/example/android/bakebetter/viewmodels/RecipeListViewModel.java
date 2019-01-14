@@ -9,6 +9,8 @@ import com.example.android.bakebetter.repository.RecipeRepository;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class RecipeListViewModel extends ViewModel{
     private static final String TAG = "RecipeListViewModel";
 
@@ -17,8 +19,9 @@ public class RecipeListViewModel extends ViewModel{
 
     private final RecipeRepository mRepo;
 
-    public RecipeListViewModel() {
-        this.mRepo = RecipeRepository.getInstance();
+    @Inject
+    public RecipeListViewModel(RecipeRepository repo) {
+        this.mRepo = repo;
     }
 
     public LiveData<List<Recipe>> getRecipes() {

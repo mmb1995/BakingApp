@@ -25,11 +25,23 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:support-vector-drawable:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'com.android.support:exifinterface:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation 'android.arch.lifecycle:viewmodel:1.1.1'
     implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    // Dagger 2.0
+    implementation 'com.google.dagger:dagger-android:2.19'
+    implementation 'com.google.dagger:dagger-android-support:2.19'
+    implementation 'com.google.dagger:dagger:2.19'
+    implementation 'com.android.support:design:28.0.0'
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.19'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.19'
 
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
