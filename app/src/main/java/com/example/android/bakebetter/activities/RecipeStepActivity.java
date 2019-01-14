@@ -1,18 +1,15 @@
 package com.example.android.bakebetter.activities;
 
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.FrameLayout;
 
 import com.example.android.bakebetter.R;
-import com.example.android.bakebetter.fragments.RecipeStepListFragment;
-import com.example.android.bakebetter.model.Ingredient;
+import com.example.android.bakebetter.adapters.RecipeStepsActivityPageAdapter;
 import com.example.android.bakebetter.model.Recipe;
-import com.example.android.bakebetter.model.Step;
-
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -30,8 +27,10 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
 
-    @BindView(R.id.fragment_container)
-    FrameLayout mRecipeListFragmentContainer;
+    @BindView(R.id.recipe_details_tabs)
+    TabLayout mTabLayout;
+    @BindView(R.id.recipe_viewpager)
+    ViewPager mViewPager;
 
     private Recipe mRecipe;
 
@@ -48,23 +47,17 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
 
         if (this.mRecipe != null) {
             Log.i(TAG, this.mRecipe.getName());
-            displayRecipeStepsFragment();
+            setUpViewPager();
         }
     }
 
-    private void displayRecipeStepsFragment() {
-        // Get the data to pass into the fragment
-        Log.i(TAG, "Num steps = " + this.mRecipe.getSteps().size());
-        ArrayList<Step> steps = (ArrayList<Step>)this.mRecipe.getSteps();
-        ArrayList<Ingredient> ingredients = (ArrayList<Ingredient>)this.mRecipe.getIngredients();
-        Fragment recipeStepsFragment = RecipeStepListFragment.newInstance(steps, ingredients);
-
-        // Display the fragment
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, recipeStepsFragment)
-                .commit();
+    private void setUpViewPager() {
+        RecipeStepsActivityPageAdapter mPageAdapter = new RecipeStepsActivityPageAdapter(this,
+                getSupportFragmentManager(), mRecipe.getSteps(), mRecipe.getIngredients());
+        mViewPager.setAdapter(mPageAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
     }
+
 
     @Override
     public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {

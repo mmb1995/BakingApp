@@ -4,4 +4,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_recipe_step">RecipeStepActivity</string>
+
+    <!-- Recipe Step Activity -->
+    <string name="ingredients_tab_title">Ingredients</string>
+    <string name="steps_tab_title">Steps</string>
 </resources>

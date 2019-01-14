@@ -1,5 +1,6 @@
 package com.example.android.bakebetter.fragments;
 
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.bakebetter.R;
-import com.example.android.bakebetter.adapters.RecipeStepAdapter;
-import com.example.android.bakebetter.model.Step;
+import com.example.android.bakebetter.adapters.IngredientsAdapter;
+import com.example.android.bakebetter.model.Ingredient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,30 +23,28 @@ import dagger.android.support.AndroidSupportInjection;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * to handle interaction events.
- * Use the {@link RecipeStepListFragment#newInstance} factory method to
+ * Use the {@link RecipeIngredientsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecipeStepListFragment extends Fragment {
+public class RecipeIngredientsFragment extends Fragment {
     private static final String TAG = "RecipeStepListFragment";
 
-    private static final String ARG_STEPS = "steps";
+    private static final String ARG_INGREDIENTS = "ingredients";
 
-    @BindView(R.id.recipe_step_recycler_view)
-    RecyclerView mStepRecyclerView;
+    @BindView(R.id.recipe_ingredient_recycler_view)
+    RecyclerView mIngredientRecyclerView;
 
-    private List<Step> mSteps;
+    private List<Ingredient> mIngredients;
 
-    public RecipeStepListFragment() {
+    public RecipeIngredientsFragment() {
         // Required empty public constructor
     }
 
 
-    public static RecipeStepListFragment newInstance(ArrayList<Step> steps) {
-        RecipeStepListFragment fragment = new RecipeStepListFragment();
+    public static RecipeIngredientsFragment newInstance(ArrayList<Ingredient> ingredients) {
+        RecipeIngredientsFragment fragment = new RecipeIngredientsFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList(ARG_STEPS, steps);
+        args.putParcelableArrayList(ARG_INGREDIENTS, ingredients);
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,17 +53,17 @@ public class RecipeStepListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mSteps = getArguments().getParcelableArrayList(ARG_STEPS);
+            mIngredients = getArguments().getParcelableArrayList(ARG_INGREDIENTS);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_recipe_step_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_recipe_ingredients, container, false);
         ButterKnife.bind(this, rootView);
-        mStepRecyclerView.setLayoutManager( new LinearLayoutManager(getActivity()));
-        mStepRecyclerView.setAdapter(new RecipeStepAdapter(getActivity(),mSteps));
+        mIngredientRecyclerView.setLayoutManager( new LinearLayoutManager(getActivity()));
+        mIngredientRecyclerView.setAdapter(new IngredientsAdapter(getActivity(),mIngredients));
         return rootView;
     }
 
@@ -72,12 +71,6 @@ public class RecipeStepListFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         AndroidSupportInjection.inject(this);
-    }
-
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
 }
