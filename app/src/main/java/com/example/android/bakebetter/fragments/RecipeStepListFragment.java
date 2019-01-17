@@ -1,5 +1,6 @@
 package com.example.android.bakebetter.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeStepAdapter;
+import com.example.android.bakebetter.interfaces.RecipeStepClickListener;
 import com.example.android.bakebetter.model.Step;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ import dagger.android.support.AndroidSupportInjection;
  * Use the {@link RecipeStepListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecipeStepListFragment extends Fragment {
+public class RecipeStepListFragment extends Fragment implements RecipeStepClickListener {
     private static final String TAG = "RecipeStepListFragment";
 
     private static final String ARG_STEPS = "steps";
@@ -36,6 +38,8 @@ public class RecipeStepListFragment extends Fragment {
     RecyclerView mStepRecyclerView;
 
     private List<Step> mSteps;
+    private RecipeStepAdapter mAdapter;
+    private OnStepSelectedListener mCallback;
 
     public RecipeStepListFragment() {
         // Required empty public constructor
@@ -59,12 +63,25 @@ public class RecipeStepListFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // Makes sure the container activity has implemented the callback interfaces
+        try {
+            mCallback = (OnStepSelectedListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + "must implement OnStepSelectedListener");
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_recipe_step_list, container, false);
         ButterKnife.bind(this, rootView);
         mStepRecyclerView.setLayoutManager( new LinearLayoutManager(getActivity()));
-        mStepRecyclerView.setAdapter(new RecipeStepAdapter(getActivity(),mSteps));
+        mAdapter = new RecipeStepAdapter(getContext(), mSteps, this);
+        mStepRecyclerView.setAdapter(mAdapter);
         return rootView;
     }
 
@@ -80,4 +97,13 @@ public class RecipeStepListFragment extends Fragment {
         super.onDetach();
     }
 
+    @Override
+    public void onRecipeStepClicked(int pos) {
+        mCallback.onStepSelected(mAdapter.getRecipeAtPosition(pos));
+    }
+
+    // Container Activity must implement this callback
+    public interface OnStepSelectedListener {
+        void onStepSelected(Step step);
+    }
 }
