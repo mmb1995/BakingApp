@@ -1,14 +1,24 @@
 package com.example.android.bakebetter.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "Steps", foreignKeys = @ForeignKey(entity = Recipe.class,
+        parentColumns = "id",
+        childColumns = "recipeId",
+        onDelete = ForeignKey.CASCADE))
 public class Step implements Parcelable
 {
-
+    @PrimaryKey(autoGenerate = true)
+    public int stepId = 0;
+    @Ignore
     @SerializedName("id")
     @Expose
     private Long id;
@@ -24,6 +34,7 @@ public class Step implements Parcelable
     @SerializedName("thumbnailURL")
     @Expose
     private String thumbnailURL;
+    public Long recipeId;
     public final static Parcelable.Creator<Step> CREATOR = new Creator<Step>() {
 
 

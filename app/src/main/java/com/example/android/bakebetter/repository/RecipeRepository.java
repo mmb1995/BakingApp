@@ -1,56 +1,126 @@
 package com.example.android.bakebetter.repository;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
+import com.example.android.bakebetter.database.RecipeDao;
+import com.example.android.bakebetter.model.Ingredient;
 import com.example.android.bakebetter.model.Recipe;
+import com.example.android.bakebetter.model.Step;
 import com.example.android.bakebetter.network.RecipeService;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@Singleton
 public class RecipeRepository {
     private static final String TAG="RecipeRepository";
 
     private final RecipeService mWebService;
-
+    private final RecipeDao mRecipeDao;
+    private final Executor mExecutor;
 
     /**
-     * Singleton constructor
+     * Singleton constructor arguments provided by dagger injection
      * @return
      */
     @Inject
-    public RecipeRepository(RecipeService service) {
+    public RecipeRepository(RecipeService service, RecipeDao recipeDao, Executor executor) {
         this.mWebService = service;
+        this.mRecipeDao = recipeDao;
+        this.mExecutor = executor;
     }
 
     public LiveData<List<Recipe>> getRecipes() {
-        final MutableLiveData<List<Recipe>> results = new MutableLiveData<>();
-        Log.i(TAG,"Getting recipes");
-        // Performs the network request
-        mWebService.getRecipes().enqueue(new Callback<List<Recipe>>() {
-            @Override
-            public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
-                Log.i(TAG,response.body().toString());
-                if (response.isSuccessful()) {
-                    results.setValue(response.body());
-                }
-            }
+       refreshRecipes();
+       return mRecipeDao.getRecipes();
+    }
 
-            @Override
-            public void onFailure(Call<List<Recipe>> call, Throwable t) {
-                // TODO
+    public LiveData<List<Ingredient>> getIngredientsByRecipe(Long recipeId) {
+        refreshRecipes();
+        return mRecipeDao.getIngredientsForRecipe(recipeId);
+    }
 
-                t.printStackTrace();
+    public LiveData<List<Step>> getStepsByRecipe(Long recipeId) {
+        refreshRecipes();
+        return mRecipeDao.getStepsForRecipe(recipeId);
+    }
+
+    /**
+     * Checks to see if the database is empty, and if so performs a network request and adds the
+     * results to the database
+     */
+    private void refreshRecipes() {
+        // Works on background thread
+        mExecutor.execute(() -> {
+            // Checks if there are recipes present in the database
+            int count = mRecipeDao.hasRecipes();
+            if (count == 0) {
+                mWebService.getRecipes().enqueue(new Callback<List<Recipe>>() {
+                    @Override
+                    public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
+                        Log.i(TAG,response.body().toString());
+                        if (response.isSuccessful()) {
+                            insertRecipes(response.body());
+                            insertIngredients(response.body());
+                            insertSteps(response.body());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                        // TODO
+
+                        t.printStackTrace();
+                    }
+                });
             }
         });
-        return results;
+    }
+
+    /**
+     * Connects all of the Ingredients to the recipe they belong to by supplying them with a
+     * foreign key to represent the recipe they are associated with
+     * @param ingredients
+     * @param recipeId
+     */
+    private void addForeignKeyToIngredients(final List<Ingredient> ingredients, Long recipeId) {
+        for (Ingredient ingredient : ingredients) {
+            ingredient.recipeId = recipeId;
+        }
+    }
+
+    private void addForeignKeyToSteps(final List<Step> steps, Long recipeId) {
+        for (Step step: steps) {
+            step.recipeId = recipeId;
+        }
+    }
+
+    private void insertIngredients(final List<Recipe> recipes) {
+        for (Recipe recipe: recipes) {
+            final List<Ingredient> ingredients = recipe.getIngredients();
+            addForeignKeyToIngredients(ingredients, recipe.getId());
+            mExecutor.execute(() -> mRecipeDao.addAllIngredients(ingredients));
+        }
+    }
+
+    private void insertSteps(final List<Recipe> recipes) {
+        for (Recipe recipe: recipes) {
+            final List<Step> steps = recipe.getSteps();
+            addForeignKeyToSteps(steps, recipe.getId());
+            mExecutor.execute(() -> mRecipeDao.addAllSteps(steps));
+        }
+    }
+
+    private void insertRecipes(final List<Recipe> recipes) {
+        mExecutor.execute(() -> mRecipeDao.addAllRecipes(recipes));
     }
 
 }

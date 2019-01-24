@@ -1,5 +1,8 @@
 package com.example.android.bakebetter.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -8,19 +11,23 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+@Entity(tableName = "Recipes")
 public class Recipe implements Parcelable {
 
     @SerializedName("id")
     @Expose
+    @PrimaryKey
     private Long id;
     @SerializedName("name")
     @Expose
     private String name;
     @SerializedName("ingredients")
     @Expose
+    @Ignore
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
     @SerializedName("steps")
     @Expose
+    @Ignore
     private ArrayList<Step> steps = new ArrayList<Step>();
     @SerializedName("servings")
     @Expose

@@ -3,12 +3,12 @@ package com.example.android.bakebetter;
 import android.app.Activity;
 import android.app.Application;
 
+import com.example.android.bakebetter.di.components.AppComponent;
 import com.example.android.bakebetter.di.components.DaggerAppComponent;
 import com.example.android.bakebetter.di.modules.AppModule;
 
 import javax.inject.Inject;
 
-import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 
@@ -16,6 +16,8 @@ public class MyApplication extends Application implements HasActivityInjector {
 
     @Inject
     DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
+
+    private AppComponent appComponent;
 
     @Override
     public void onCreate() {
@@ -29,7 +31,7 @@ public class MyApplication extends Application implements HasActivityInjector {
     }
 
     @Override
-    public AndroidInjector<Activity> activityInjector() {
+    public DispatchingAndroidInjector<Activity> activityInjector() {
         return dispatchingAndroidInjector;
     }
 }
