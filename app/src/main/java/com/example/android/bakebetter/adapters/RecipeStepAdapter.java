@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.bakebetter.R;
+import com.example.android.bakebetter.interfaces.RecipeStepClickListener;
 import com.example.android.bakebetter.model.Step;
 
 import java.util.List;
@@ -21,10 +22,12 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.Re
 
     private List<Step> mStepsList;
     private Context mContext;
+    private final RecipeStepClickListener mListener;
 
-    public RecipeStepAdapter(Context context, List<Step> steps) {
+    public RecipeStepAdapter(Context context, List<Step> steps, RecipeStepClickListener listener) {
         this.mContext = context;
         this.mStepsList = steps;
+        this.mListener = listener;
     }
 
     @NonNull
@@ -32,7 +35,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.Re
     public RecipeStepViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View rootView = inflater.inflate(R.layout.item_recipe_step, viewGroup, false);
-        return new RecipeStepViewHolder(rootView);
+        return new RecipeStepViewHolder(rootView, mListener);
     }
 
     @Override
@@ -51,13 +54,28 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.Re
         return 0;
     }
 
-    public class RecipeStepViewHolder extends RecyclerView.ViewHolder {
+    public Step getRecipeAtPosition(int position) {
+        if (mStepsList != null && position >= 0) {
+            return mStepsList.get(position);
+        }
+        return null;
+    }
+
+    public class RecipeStepViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.recipe_short_description_text_view)
         TextView mDescriptionView;
+        private final RecipeStepClickListener mListener;
 
-        public RecipeStepViewHolder(@NonNull View itemView) {
+        public RecipeStepViewHolder(@NonNull View itemView, RecipeStepClickListener listener) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            this.mListener = listener;
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            mListener.onRecipeStepClicked(getLayoutPosition());
         }
     }
 }

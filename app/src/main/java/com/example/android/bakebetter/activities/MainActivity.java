@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -13,13 +13,9 @@ import android.widget.ProgressBar;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeGalleryAdapter;
-import com.example.android.bakebetter.model.Ingredient;
 import com.example.android.bakebetter.model.Recipe;
-import com.example.android.bakebetter.model.Step;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.RecipeListViewModel;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -47,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     FactoryViewModel mFactoryViewModel;
 
     private RecipeGalleryAdapter mAdapter;
-    private RecipeListViewModel mRecipeViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +50,9 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         AndroidInjection.inject(this);
-        GridLayoutManager mGridLayoutManager = new GridLayoutManager(this, 2);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         this.mAdapter = new RecipeGalleryAdapter(this, this);
-        this.mRecyclerView.setLayoutManager(mGridLayoutManager);
+        this.mRecyclerView.setLayoutManager(mLayoutManager);
         this.mRecyclerView.setAdapter(mAdapter);
         configureViewModel();
     }
@@ -70,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     @Override
     public void onRecipeClicked(int position) {
         Recipe currentRecipe = mAdapter.getRecipeAtPosition(position);
-        //printIngredientsandSteps(currentRecipe);
         Log.i(TAG, "recipe =" + currentRecipe.getName());
         Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeStepActivity.class);
         startStepsActivityIntent.putExtra(RecipeStepActivity.ARG_RECIPE, currentRecipe);
@@ -89,19 +83,6 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
                 mAdapter.setRecipesList(recipes);
             }
         });
-    }
-
-    private void getPhotos(List<Recipe> recipes) {
-
-    }
-
-    private void printIngredientsandSteps(Recipe recipe) {
-        for (Ingredient ingredient: recipe.getIngredients()) {
-            Log.i(TAG, "Ingredient = " + ingredient);
-        }
-        for (Step step: recipe.getSteps()) {
-            Log.i(TAG, "step = " +step);
-        }
     }
 
     @Override

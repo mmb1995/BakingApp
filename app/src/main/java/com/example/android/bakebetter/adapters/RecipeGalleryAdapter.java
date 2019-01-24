@@ -2,6 +2,7 @@ package com.example.android.bakebetter.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +16,9 @@ import com.example.android.bakebetter.model.Recipe;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdapter.RecipeViewHolder> {
     private static final String TAG = "RecipeGalleryAdapter";
@@ -45,10 +49,26 @@ public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdap
         Recipe currentRecipe = mRecipeList.get(pos);
         Log.i(TAG, currentRecipe.getName());
         holder.mNameTextView.setText(currentRecipe.getName());
+        holder.mServingsTextView.setText("" + currentRecipe.getServings() + " servings");
 
         Picasso.get()
                 .load(R.drawable.baking_image)
                 .into(holder.mGalleryImageView);
+
+        /**
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                    Blurry.with(mContext)
+                            .radius(RecipeUtils.RADIUS_BLUR)
+                            .sampling(RecipeUtils.SAMPLING_BLUR)
+                            .animate(RecipeUtils.ANIMATE_BLUR)
+                            .async()
+                            .capture(holder.mConstraintLayout)
+                            .into(holder.mGalleryImageView);
+                }
+        }, RecipeUtils.MILLISECOND_TO_BLUR);
+      **/
     }
 
     @Override
@@ -74,13 +94,15 @@ public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdap
     public class RecipeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final OnRecipeClickListener mCallback;
-        ImageView mGalleryImageView;
-        TextView mNameTextView;
+        @BindView(R.id.recipe_gallery_image_view) ImageView mGalleryImageView;
+        @BindView(R.id.recipe_name_text_view) TextView mNameTextView;
+        @BindView(R.id.servingsTextView) TextView mServingsTextView;
+        @BindView(R.id.imageConstraintLayout) ConstraintLayout mConstraintLayout;
+
 
         public RecipeViewHolder(@NonNull View itemView, OnRecipeClickListener callback) {
             super(itemView);
-            mGalleryImageView = itemView.findViewById(R.id.recipe_gallery_image_view);
-            mNameTextView = itemView.findViewById(R.id.recipe_name_text_view);
+            ButterKnife.bind(this, itemView);
             mCallback = callback;
             itemView.setOnClickListener(this);
         }
