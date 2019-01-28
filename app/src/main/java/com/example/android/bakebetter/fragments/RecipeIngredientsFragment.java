@@ -1,6 +1,7 @@
 package com.example.android.bakebetter.fragments;
 
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,10 +13,10 @@ import android.view.ViewGroup;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.IngredientsAdapter;
-import com.example.android.bakebetter.model.Ingredient;
+import com.example.android.bakebetter.viewmodels.FactoryViewModel;
+import com.example.android.bakebetter.viewmodels.IngredientsViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,17 +35,20 @@ public class RecipeIngredientsFragment extends Fragment {
     @BindView(R.id.recipe_ingredient_recycler_view)
     RecyclerView mIngredientRecyclerView;
 
-    private List<Ingredient> mIngredients;
+    @Inject
+    public FactoryViewModel mFactoryViewModel;
+
+    private Long mRecipeId;
 
     public RecipeIngredientsFragment() {
         // Required empty public constructor
     }
 
 
-    public static RecipeIngredientsFragment newInstance(ArrayList<Ingredient> ingredients) {
+    public static RecipeIngredientsFragment newInstance(Long recipeID) {
         RecipeIngredientsFragment fragment = new RecipeIngredientsFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList(ARG_INGREDIENTS, ingredients);
+        args.putLong(ARG_INGREDIENTS, recipeID);
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,7 +57,7 @@ public class RecipeIngredientsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mIngredients = getArguments().getParcelableArrayList(ARG_INGREDIENTS);
+            mRecipeId = getArguments().getLong(ARG_INGREDIENTS);
         }
     }
 
@@ -63,7 +67,6 @@ public class RecipeIngredientsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_recipe_ingredients, container, false);
         ButterKnife.bind(this, rootView);
         mIngredientRecyclerView.setLayoutManager( new LinearLayoutManager(getActivity()));
-        mIngredientRecyclerView.setAdapter(new IngredientsAdapter(getActivity(),mIngredients));
         return rootView;
     }
 
@@ -71,6 +74,19 @@ public class RecipeIngredientsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         AndroidSupportInjection.inject(this);
+        configureIngredients();
+    }
+
+    private void configureIngredients() {
+        IngredientsViewModel model = ViewModelProviders.of(getActivity(), mFactoryViewModel)
+                .get(IngredientsViewModel.class);
+        model.init(mRecipeId);
+
+        // sets up observer and callback
+        model.getIngredients().observe(this, ingredients -> {
+            IngredientsAdapter adapter = new IngredientsAdapter(getContext(), ingredients);
+            mIngredientRecyclerView.setAdapter(adapter);
+        });
     }
 
 }

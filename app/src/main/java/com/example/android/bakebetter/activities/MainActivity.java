@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
         Recipe currentRecipe = mAdapter.getRecipeAtPosition(position);
         Log.i(TAG, "recipe =" + currentRecipe.getName());
         Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeStepActivity.class);
-        startStepsActivityIntent.putExtra(RecipeStepActivity.ARG_RECIPE, currentRecipe);
+        startStepsActivityIntent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, currentRecipe.getId());
         startActivity(startStepsActivityIntent);
     }
 

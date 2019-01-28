@@ -1,5 +1,6 @@
 package com.example.android.bakebetter.fragments;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,9 +15,10 @@ import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeStepAdapter;
 import com.example.android.bakebetter.interfaces.RecipeStepClickListener;
 import com.example.android.bakebetter.model.Step;
+import com.example.android.bakebetter.viewmodels.FactoryViewModel;
+import com.example.android.bakebetter.viewmodels.StepsViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,7 +39,10 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     @BindView(R.id.recipe_step_recycler_view)
     RecyclerView mStepRecyclerView;
 
-    private List<Step> mSteps;
+    @Inject
+    public FactoryViewModel mFactoryViewModel;
+
+    private Long mRecipeId;
     private RecipeStepAdapter mAdapter;
     private OnStepSelectedListener mCallback;
 
@@ -46,10 +51,10 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     }
 
 
-    public static RecipeStepListFragment newInstance(ArrayList<Step> steps) {
+    public static RecipeStepListFragment newInstance(Long recipeId) {
         RecipeStepListFragment fragment = new RecipeStepListFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList(ARG_STEPS, steps);
+        args.putLong(ARG_STEPS, recipeId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,7 +63,7 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mSteps = getArguments().getParcelableArrayList(ARG_STEPS);
+            mRecipeId = getArguments().getLong(ARG_STEPS);
         }
     }
 
@@ -80,8 +85,6 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
         View rootView = inflater.inflate(R.layout.fragment_recipe_step_list, container, false);
         ButterKnife.bind(this, rootView);
         mStepRecyclerView.setLayoutManager( new LinearLayoutManager(getActivity()));
-        mAdapter = new RecipeStepAdapter(getContext(), mSteps, this);
-        mStepRecyclerView.setAdapter(mAdapter);
         return rootView;
     }
 
@@ -89,13 +92,9 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         AndroidSupportInjection.inject(this);
+        configureSteps();
     }
 
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
 
     @Override
     public void onRecipeStepClicked(int pos) {
@@ -105,5 +104,17 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     // Container Activity must implement this callback
     public interface OnStepSelectedListener {
         void onStepSelected(Step step);
+    }
+
+    private void configureSteps() {
+        StepsViewModel model = ViewModelProviders.of(getActivity(), mFactoryViewModel)
+                .get(StepsViewModel.class);
+        model.init(mRecipeId);
+
+        // Set up Observer and callback
+        model.getSteps().observe(this, steps -> {
+            mAdapter = new RecipeStepAdapter(getContext(), steps, this);
+            mStepRecyclerView.setAdapter(mAdapter);
+        });
     }
 }

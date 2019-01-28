@@ -1,10 +1,8 @@
 package com.example.android.bakebetter.di.modules;
 
 import com.example.android.bakebetter.network.RecipeService;
-import com.example.android.bakebetter.network.UnsplashApiService;
 import com.example.android.bakebetter.utils.RecipeUtils;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -24,7 +22,6 @@ public class NetworksModule {
 
     @Provides
     @Singleton
-    @Named("RecipesRetrofit")
     Retrofit provideRecipesRetrofit(OkHttpClient okHttpClient) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(RecipeUtils.RECIPE_URL)
@@ -36,25 +33,8 @@ public class NetworksModule {
 
     @Provides
     @Singleton
-    @Named("UnsplashRetrofit")
-    Retrofit provideUnsplashRetrofit(OkHttpClient okHttpClient) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(RecipeUtils.UNSPLASH_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(okHttpClient)
-                .build();
-        return retrofit;
-    }
-
-    @Provides
-    @Singleton
-    RecipeService provideRecipeService(@Named("RecipesRetrofit") Retrofit retrofit) {
+    RecipeService provideRecipeService(Retrofit retrofit) {
         return retrofit.create(RecipeService.class);
     }
 
-    @Provides
-    @Singleton
-    UnsplashApiService provideUnsplashApiService(@Named("UnsplashRetrofit") Retrofit retrofit) {
-        return retrofit.create(UnsplashApiService.class);
-    }
 }

@@ -1,13 +1,21 @@
 package com.example.android.bakebetter.model;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "Ingredients", foreignKeys = @ForeignKey(entity = Recipe.class,
+        parentColumns = "id",
+        childColumns = "recipeId",
+        onDelete = ForeignKey.CASCADE))
 public class Ingredient implements Parcelable
 {
-
+    @PrimaryKey(autoGenerate = true)
+    public int id = 0;
     @SerializedName("quantity")
     @Expose
     private Double quantity;
@@ -17,6 +25,8 @@ public class Ingredient implements Parcelable
     @SerializedName("ingredient")
     @Expose
     private String ingredient;
+    public Long recipeId;
+
     public final static Parcelable.Creator<Ingredient> CREATOR = new Creator<Ingredient>() {
 
 

@@ -9,7 +9,9 @@ import dagger.Provides;
 
 @Module(includes = {
         ViewModelModule.class,
-        NetworksModule.class
+        NetworksModule.class,
+        DatabaseModule.class,
+        RepositoryModule.class
 })
 
 public class AppModule {
@@ -24,4 +26,5 @@ public class AppModule {
     Application providesApplication() {
         return application;
     }
+
 }

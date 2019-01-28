@@ -6,12 +6,10 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeStepsActivityPageAdapter;
 import com.example.android.bakebetter.fragments.RecipeStepListFragment;
-import com.example.android.bakebetter.model.Recipe;
 import com.example.android.bakebetter.model.Step;
 
 import javax.inject.Inject;
@@ -26,7 +24,7 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
         RecipeStepListFragment.OnStepSelectedListener {
     private static final String TAG = "RecipeStepActivity";
 
-    public static final String ARG_RECIPE = "recipe";
+    public static final String ARG_RECIPE_ID = "recipe";
 
     @Inject
     DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
@@ -36,7 +34,7 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
     @BindView(R.id.recipe_viewpager)
     ViewPager mViewPager;
 
-    private Recipe mRecipe;
+    private Long mRecipeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,17 +44,16 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
         AndroidInjection.inject(this);
 
         // Get the data passed in from the starting intent
-        this.mRecipe = (Recipe) getIntent().getParcelableExtra(ARG_RECIPE);
+        this.mRecipeId = getIntent().getLongExtra(ARG_RECIPE_ID, 0);
 
-        if (this.mRecipe != null) {
-            Log.i(TAG, this.mRecipe.getName());
+        if (this.mRecipeId != null) {
             setUpViewPager();
         }
     }
 
     private void setUpViewPager() {
         RecipeStepsActivityPageAdapter mPageAdapter = new RecipeStepsActivityPageAdapter(this,
-                getSupportFragmentManager(), mRecipe.getSteps(), mRecipe.getIngredients());
+                getSupportFragmentManager(), mRecipeId);
         mViewPager.setAdapter(mPageAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
     }
