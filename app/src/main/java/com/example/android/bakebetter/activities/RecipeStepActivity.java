@@ -68,7 +68,8 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
     @Override
     public void onStepSelected(Step step) {
         Intent detailsIntent = new Intent(this, RecipeDetailsActivity.class);
-        detailsIntent.putExtra("step", step.stepId);
+        detailsIntent.putExtra("stepId", step.stepId);
+        detailsIntent.putExtra("recipeId", mRecipeId);
         Log.i(TAG, "stepId = " + step.stepId);
         startActivity(detailsIntent);
     }
