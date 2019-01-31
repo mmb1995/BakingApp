@@ -3,6 +3,7 @@ package com.example.android.bakebetter.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.Re
     @Override
     public void onBindViewHolder(@NonNull RecipeStepViewHolder holder, int pos) {
         Step currentStep = mStepsList.get(pos);
+        Log.i(TAG,"stepId = " + currentStep.stepId + "id = " + currentStep.getId());
         if (currentStep.getShortDescription() != null) {
             holder.mDescriptionView.setText(currentStep.getShortDescription());
         }

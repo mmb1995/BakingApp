@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import com.example.android.bakebetter.di.ViewModelKey;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.IngredientsViewModel;
+import com.example.android.bakebetter.viewmodels.RecipeDetailsViewModel;
 import com.example.android.bakebetter.viewmodels.RecipeListViewModel;
 import com.example.android.bakebetter.viewmodels.StepsViewModel;
 
@@ -30,6 +31,11 @@ public abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(StepsViewModel.class)
     abstract ViewModel bindStepsListViewModel(StepsViewModel stepsViewModel);
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(RecipeDetailsViewModel.class)
+    abstract ViewModel bindRecipeDetailsViewModel(RecipeDetailsViewModel detailsViewModel);
 
 
 

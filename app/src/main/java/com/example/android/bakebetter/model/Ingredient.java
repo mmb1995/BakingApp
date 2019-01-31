@@ -15,7 +15,7 @@ import com.google.gson.annotations.SerializedName;
 public class Ingredient implements Parcelable
 {
     @PrimaryKey(autoGenerate = true)
-    public int id = 0;
+    public int id;
     @SerializedName("quantity")
     @Expose
     private Double quantity;

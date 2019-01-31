@@ -53,6 +53,31 @@ public class RecipeRepository {
         return mRecipeDao.getStepsForRecipe(recipeId);
     }
 
+    public LiveData<Step> getStep(int stepId) {
+        return mRecipeDao.getStepById(stepId);
+    }
+
+    /**
+     * NOTE VERY DANGEROUS ONLY FOR DEBUGGING REMOVE LATER
+     */
+    public void nukeTable() {
+        mExecutor.execute(() -> {
+            mRecipeDao.nukeRecipes();
+            mRecipeDao.nukeIngredients();
+            mRecipeDao.nukeSteps();
+        });
+    }
+
+    /**
+     * REMOVE LATER
+     */
+    public void checkRecords() {
+        mExecutor.execute(() -> {
+            int count = mRecipeDao.hasRecipes();
+            Log.i(TAG, "records = " + count);
+        });
+    }
+
     /**
      * Checks to see if the database is empty, and if so performs a network request and adds the
      * results to the database

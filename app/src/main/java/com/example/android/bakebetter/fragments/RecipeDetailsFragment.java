@@ -1,9 +1,12 @@
 package com.example.android.bakebetter.fragments;
 
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +14,8 @@ import android.widget.TextView;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.model.Step;
+import com.example.android.bakebetter.viewmodels.FactoryViewModel;
+import com.example.android.bakebetter.viewmodels.RecipeDetailsViewModel;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -24,8 +29,11 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dagger.android.support.AndroidSupportInjection;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,6 +41,7 @@ import butterknife.ButterKnife;
  * create an instance of this fragment.
  */
 public class RecipeDetailsFragment extends Fragment {
+    private static final String TAG = "RecipeDetailsFragment";
 
     private static final String ARG_RECIPE_STEP = "step";
 
@@ -45,7 +54,10 @@ public class RecipeDetailsFragment extends Fragment {
     @BindView(R.id.RecipeVideoPlayer)
     SimpleExoPlayerView mPlayerView;
 
-    private Step mStep;
+    @Inject
+    public FactoryViewModel mFactoryViewModel;
+
+    private int mStepId;
     private SimpleExoPlayer mExoPlayer;
 
 
@@ -59,10 +71,10 @@ public class RecipeDetailsFragment extends Fragment {
      *
      * @return A new instance of fragment RecipeDetailsFragment.
      */
-    public static RecipeDetailsFragment newInstance(Step step) {
+    public static RecipeDetailsFragment newInstance(int stepId) {
         RecipeDetailsFragment fragment = new RecipeDetailsFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_RECIPE_STEP, step);
+        args.putInt(ARG_RECIPE_STEP, stepId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,7 +83,7 @@ public class RecipeDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mStep = getArguments().getParcelable(ARG_RECIPE_STEP);
+            mStepId = getArguments().getInt(ARG_RECIPE_STEP);
         }
     }
 
@@ -81,17 +93,40 @@ public class RecipeDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_recipe_details, container, false);
         ButterKnife.bind(this, rootView);
-        mTitleTextView.setText(mStep.getShortDescription());
-        mContentTextView.setText(mStep.getDescription());
-        initializePlayer(Uri.parse(mStep.getVideoURL()));
         return rootView;
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        AndroidSupportInjection.inject(this);
+        configureViewModel();
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         releasePlayer();
+    }
+
+    private void configureViewModel() {
+        RecipeDetailsViewModel model = ViewModelProviders.of(this, mFactoryViewModel)
+                .get(RecipeDetailsViewModel.class);
+        model.init(mStepId);
+
+        // Set up observer and callback
+        model.getStep().observe(this, step -> {
+            if (step != null) {
+                Log.i(TAG, step.getDescription());
+                setupUi(step);
+            }
+        });
+    }
+
+    private void setupUi(Step step) {
+        mTitleTextView.setText(step.getShortDescription());
+        mContentTextView.setText(step.getDescription());
+        initializePlayer(Uri.parse(step.getVideoURL()));
     }
 
 
@@ -116,9 +151,11 @@ public class RecipeDetailsFragment extends Fragment {
      * Releases ExoPlayer instance
      */
     private void releasePlayer() {
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        if (mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
     }
 
 }

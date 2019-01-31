@@ -20,6 +20,7 @@ public class DatabaseModule {
     @Singleton
     RecipesDatabase provideDatabase(Application application) {
         return Room.databaseBuilder(application, RecipesDatabase.class,"recipesDatabase.db")
+                .addMigrations(RecipesDatabase.MIGRATION_1_2)
                 .build();
     }
 
