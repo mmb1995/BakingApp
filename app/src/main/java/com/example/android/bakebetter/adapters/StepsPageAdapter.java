@@ -19,7 +19,7 @@ public class StepsPageAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return RecipeDetailsFragment.newInstance(stepsList.get(position).stepId);
+        return RecipeDetailsFragment.newInstance(stepsList.get(position));
     }
 
     @Override
