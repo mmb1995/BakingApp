@@ -222,7 +222,7 @@ public class RecipeDetailsFragment extends Fragment {
      * Hides the system ui to allow fullscreen video
      */
     private void hideSystemUI() {
-        // hide the action bar
+        // hide the action barout
         ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
 
         getActivity().getWindow().getDecorView().setSystemUiVisibility(
