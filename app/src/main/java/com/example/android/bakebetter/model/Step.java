@@ -17,7 +17,7 @@ import com.google.gson.annotations.SerializedName;
 public class Step implements Parcelable
 {
     @PrimaryKey(autoGenerate = true)
-    public int stepId = 0;
+    public int stepId;
     @Ignore
     @SerializedName("id")
     @Expose
@@ -58,6 +58,7 @@ public class Step implements Parcelable
         this.description = ((String) in.readValue((String.class.getClassLoader())));
         this.videoURL = ((String) in.readValue((String.class.getClassLoader())));
         this.thumbnailURL = ((String) in.readValue((String.class.getClassLoader())));
+        this.stepId = in.readInt();
     }
 
     public Step() {
@@ -109,6 +110,7 @@ public class Step implements Parcelable
         dest.writeValue(description);
         dest.writeValue(videoURL);
         dest.writeValue(thumbnailURL);
+        dest.writeValue(stepId);
     }
 
     public int describeContents() {

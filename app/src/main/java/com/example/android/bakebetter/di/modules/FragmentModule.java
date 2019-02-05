@@ -1,5 +1,6 @@
 package com.example.android.bakebetter.di.modules;
 
+import com.example.android.bakebetter.fragments.RecipeDetailsFragment;
 import com.example.android.bakebetter.fragments.RecipeIngredientsFragment;
 import com.example.android.bakebetter.fragments.RecipeStepListFragment;
 
@@ -13,4 +14,7 @@ public abstract class FragmentModule {
 
     @ContributesAndroidInjector
     abstract RecipeIngredientsFragment contributesRecipeIngredientFragment();
+
+    @ContributesAndroidInjector
+    abstract RecipeDetailsFragment contributesRecipeDetailsFragment();
 }

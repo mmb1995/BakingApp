@@ -31,4 +31,15 @@ public class RecipeListViewModel extends ViewModel{
         }
         return mRecipesList;
     }
+
+    /**
+     * NOTE VERY DANGEROUS REMOVE LATER
+     */
+    public void nukeEverything() {
+        mRepo.nukeTable();
+    }
+
+    public void getRecordsCount() {
+        mRepo.checkRecords();
+    }
 }

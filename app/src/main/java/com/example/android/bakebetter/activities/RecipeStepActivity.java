@@ -6,6 +6,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeStepsActivityPageAdapter;
@@ -67,7 +68,9 @@ public class RecipeStepActivity extends AppCompatActivity implements HasSupportF
     @Override
     public void onStepSelected(Step step) {
         Intent detailsIntent = new Intent(this, RecipeDetailsActivity.class);
-        detailsIntent.putExtra("step", step);
+        detailsIntent.putExtra("stepId", step.stepId);
+        detailsIntent.putExtra("recipeId", mRecipeId);
+        Log.i(TAG, "stepId = " + step.stepId);
         startActivity(detailsIntent);
     }
 }
