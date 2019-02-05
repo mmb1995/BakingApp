@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.StepsPageAdapter;
+import com.example.android.bakebetter.fragments.RecipeDetailsFragment;
 import com.example.android.bakebetter.model.Step;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.StepsViewModel;
@@ -28,7 +29,7 @@ public class RecipeDetailsActivity extends AppCompatActivity implements HasSuppo
     private static final String ARG_STEP_ID = "stepId";
     private static final String ARG_RECIPE_ID = "recipeId";
     private int mStepId;
-    private int mCurrentStepId;
+    private int mCurrentStepIndex;
     private List<Step> mSteps;
 
     @BindView(R.id.fragmentDetailsViewPager)
@@ -69,8 +70,35 @@ public class RecipeDetailsActivity extends AppCompatActivity implements HasSuppo
     private void setupViewPager() {
         StepsPageAdapter adapter = new StepsPageAdapter(getSupportFragmentManager(), mSteps);
         mPager.setAdapter(adapter);
-        int currentStepIndex = getCurrentStepIndex();
-        mPager.setCurrentItem(currentStepIndex);
+        mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                // Release assets associated with the fragment that is being replaced
+                RecipeDetailsFragment prevFragment = adapter.getCachedFragment(mCurrentStepIndex);
+                if (prevFragment != null ) {
+                    prevFragment.loseFocus();
+                }
+
+                // Give focus to incoming fragment
+                mCurrentStepIndex = position;
+                RecipeDetailsFragment nextFragment = adapter.getCachedFragment(mCurrentStepIndex);
+                if (nextFragment != null) {
+                    nextFragment.gainFocus();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
+        mCurrentStepIndex = getCurrentStepIndex();
+        mPager.setCurrentItem(mCurrentStepIndex);
     }
 
     private int getCurrentStepIndex() {

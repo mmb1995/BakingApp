@@ -129,7 +129,7 @@ public class RecipeDetailsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if (mExoPlayer != null) {
-            mVideoPosition = mExoPlayer.getCurrentPosition();
+            savePlayerState();
             releasePlayer();
         }
     }
@@ -158,23 +158,9 @@ public class RecipeDetailsFragment extends Fragment {
     private void setUpVideoPlayer() {
         if (getContext().getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE) {
-            // hide the action bar
-            ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
-
-            // hide the description cardview
-            mDescriptionCardView.setVisibility(View.GONE);
-
-            // activate full screen mode
-            getActivity().getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
-            // Make Exoplayer display in fullscreen
-            ViewGroup.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
-            params.width = params.MATCH_PARENT;
-            params.height = params.MATCH_PARENT;
-            mPlayerView.setLayoutParams(params);
-
+            // This means the phone is in landscape orientation and should display the video in fullscreen
+            hideSystemUI();
+            showVideoInFullScreen();
         }
         initializePlayer();
     }
@@ -210,4 +196,54 @@ public class RecipeDetailsFragment extends Fragment {
             mExoPlayer = null;
         }
     }
+
+    /**
+     * Used by the Viewpager to ensure assets are released when the user swipes
+     */
+    public void loseFocus() {
+        savePlayerState();
+        releasePlayer();
+    }
+
+    /**
+     * Called by the ViewPager to initialize assets for incoming fragment
+     */
+    public void gainFocus() {
+        initializePlayer();
+    }
+
+    private void savePlayerState() {
+        if (mExoPlayer != null) {
+            mVideoPosition = mExoPlayer.getCurrentPosition();
+        }
+    }
+
+    /**
+     * Hides the system ui to allow fullscreen video
+     */
+    private void hideSystemUI() {
+        // hide the action bar
+        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+
+        getActivity().getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+    }
+
+    /**
+     * Displays the video in fullscreen when phone is in landscape orientation
+     */
+    private void showVideoInFullScreen() {
+        // hide the description cardview
+        mDescriptionCardView.setVisibility(View.GONE);
+
+        // Enable fullscreen
+        ViewGroup.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
+        params.width = params.MATCH_PARENT;
+        params.height = params.MATCH_PARENT;
+        mPlayerView.setLayoutParams(params);
+    }
+
 }
