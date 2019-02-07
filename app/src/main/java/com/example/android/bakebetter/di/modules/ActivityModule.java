@@ -2,7 +2,7 @@ package com.example.android.bakebetter.di.modules;
 
 import com.example.android.bakebetter.activities.MainActivity;
 import com.example.android.bakebetter.activities.RecipeDetailsActivity;
-import com.example.android.bakebetter.activities.RecipeStepActivity;
+import com.example.android.bakebetter.activities.RecipeMasterActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -13,7 +13,7 @@ public abstract class ActivityModule {
     abstract MainActivity contributeMainActivity();
 
     @ContributesAndroidInjector
-    abstract RecipeStepActivity contributeRecipeStepActivity();
+    abstract RecipeMasterActivity contributeRecipeStepActivity();
 
     @ContributesAndroidInjector
     abstract RecipeDetailsActivity contributesRecipeDetailsActivity();

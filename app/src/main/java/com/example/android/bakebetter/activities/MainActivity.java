@@ -3,8 +3,10 @@ package com.example.android.bakebetter.activities;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -50,9 +52,25 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         AndroidInjection.inject(this);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+
+        // Check phone configuration
+        if (getResources().getBoolean(R.bool.isTablet)) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+                this.mRecyclerView.setLayoutManager(layoutManager);
+            } else {
+                GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+                this.mRecyclerView.setLayoutManager(layoutManager);
+            }
+        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            this.mRecyclerView.setLayoutManager(layoutManager);
+        } else {
+            // Not a tablet and phone is in landscape orientation
+            GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+            this.mRecyclerView.setLayoutManager(layoutManager);
+        }
         this.mAdapter = new RecipeGalleryAdapter(this, this);
-        this.mRecyclerView.setLayoutManager(mLayoutManager);
         this.mRecyclerView.setAdapter(mAdapter);
         configureViewModel();
     }
@@ -66,8 +84,8 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     public void onRecipeClicked(int position) {
         Recipe currentRecipe = mAdapter.getRecipeAtPosition(position);
         Log.i(TAG, "recipe =" + currentRecipe.getName());
-        Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeStepActivity.class);
-        startStepsActivityIntent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, currentRecipe.getId());
+        Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeMasterActivity.class);
+        startStepsActivityIntent.putExtra(RecipeMasterActivity.ARG_RECIPE_ID, currentRecipe.getId());
         startActivity(startStepsActivityIntent);
     }
 

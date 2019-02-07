@@ -157,7 +157,8 @@ public class RecipeDetailsFragment extends Fragment {
      */
     private void setUpVideoPlayer() {
         if (getContext().getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE) {
+                == Configuration.ORIENTATION_LANDSCAPE
+                && !getContext().getResources().getBoolean(R.bool.isTablet)) {
             // This means the phone is in landscape orientation and should display the video in fullscreen
             hideSystemUI();
             showVideoInFullScreen();
@@ -222,7 +223,7 @@ public class RecipeDetailsFragment extends Fragment {
      * Hides the system ui to allow fullscreen video
      */
     private void hideSystemUI() {
-        // hide the action barout
+        // hide the action bar
         ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
 
         getActivity().getWindow().getDecorView().setSystemUiVisibility(

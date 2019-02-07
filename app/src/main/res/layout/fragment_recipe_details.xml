@@ -14,7 +14,7 @@
         android:layout_margin="@dimen/default_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/RecipeVideoPlayer" >
+        app:layout_constraintTop_toBottomOf="@+id/RecipeVideoPlayer">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,8 +49,9 @@
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:id="@+id/RecipeVideoPlayer"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="400dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/cardView"/>
 </android.support.constraint.ConstraintLayout>
