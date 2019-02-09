@@ -18,6 +18,7 @@ import com.example.android.bakebetter.adapters.RecipeGalleryAdapter;
 import com.example.android.bakebetter.model.Recipe;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.RecipeListViewModel;
+import com.example.android.bakebetter.widget.WidgetUpdateService;
 
 import javax.inject.Inject;
 
@@ -84,6 +85,10 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     public void onRecipeClicked(int position) {
         Recipe currentRecipe = mAdapter.getRecipeAtPosition(position);
         Log.i(TAG, "recipe =" + currentRecipe.getName());
+
+        // Start service to update widget to show ingredients for the newly selected recipe
+        Log.i(TAG, "updating widget");
+        WidgetUpdateService.startWidgetUpdate(this, currentRecipe.getId());
         Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeMasterActivity.class);
         startStepsActivityIntent.putExtra(RecipeMasterActivity.ARG_RECIPE_ID, currentRecipe.getId());
         startActivity(startStepsActivityIntent);

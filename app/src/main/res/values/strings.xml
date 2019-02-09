@@ -8,4 +8,6 @@
     <!-- Recipe Step Activity -->
     <string name="ingredients_tab_title">Ingredients</string>
     <string name="steps_tab_title">Steps</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

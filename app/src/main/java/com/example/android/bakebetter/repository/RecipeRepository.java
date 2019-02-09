@@ -58,6 +58,15 @@ public class RecipeRepository {
     }
 
     /**
+     * This should only be called by the widget to avoid blocking the main thread
+     * @param recipeId
+     * @return
+     */
+    public List<Ingredient> getIngredientsSync(Long recipeId) {
+        return mRecipeDao.getIngredientsSync(recipeId);
+    }
+
+    /**
      * NOTE VERY DANGEROUS ONLY FOR DEBUGGING REMOVE LATER
      */
     public void nukeTable() {

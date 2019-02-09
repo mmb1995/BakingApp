@@ -36,6 +36,9 @@ public interface RecipeDao {
     @Query("SELECT * FROM STEPS WHERE stepId=:stepId LIMIT 1")
     LiveData<Step> getStepById(final int stepId);
 
+    @Query("SELECT * FROM INGREDIENTS WHERE recipeId=:recipeId")
+    List<Ingredient> getIngredientsSync(final Long recipeId);
+
     @Query("SELECT COUNT(*) FROM RECIPES")
     int hasRecipes();
 
