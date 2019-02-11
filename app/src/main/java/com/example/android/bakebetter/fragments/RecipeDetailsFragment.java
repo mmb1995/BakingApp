@@ -60,7 +60,6 @@ public class RecipeDetailsFragment extends Fragment {
     private Step mStep;
     private long mVideoPosition = -1;
     private boolean mSetPlayWhenReady;
-    private boolean mIsVisible; // Determines if fragment is visible on screen
 
 
     public RecipeDetailsFragment() {
@@ -183,6 +182,7 @@ public class RecipeDetailsFragment extends Fragment {
 
     private void initializePlayer() {
         if (mExoPlayer == null && mPlayerView.getVisibility() != View.GONE) {
+
             Uri mediaUri = Uri.parse(mStep.getVideoURL());
 
             // Creates an instance of the ExoPlayer
