@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeGalleryAdapter;
 import com.example.android.bakebetter.model.Recipe;
+import com.example.android.bakebetter.utils.PreferenceUtil;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.RecipeListViewModel;
 import com.example.android.bakebetter.widget.WidgetUpdateService;
@@ -85,10 +86,9 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     public void onRecipeClicked(int position) {
         Recipe currentRecipe = mAdapter.getRecipeAtPosition(position);
         Log.i(TAG, "recipe =" + currentRecipe.getName());
+        updateSharedPreferencesAndWidget(currentRecipe);
 
-        // Start service to update widget to show ingredients for the newly selected recipe
-        Log.i(TAG, "updating widget");
-        WidgetUpdateService.startWidgetUpdate(this, currentRecipe.getId());
+        // Create Intent to launch RecipeMasterActivity
         Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeMasterActivity.class);
         startStepsActivityIntent.putExtra(RecipeMasterActivity.ARG_RECIPE_ID, currentRecipe.getId());
         startActivity(startStepsActivityIntent);
@@ -106,6 +106,16 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
                 mAdapter.setRecipesList(recipes);
             }
         });
+    }
+
+    private void updateSharedPreferencesAndWidget(Recipe recipe) {
+        // Update shared Preferences
+        PreferenceUtil.setCurrentRecipeId(this, recipe.getId());
+        PreferenceUtil.setCurrentRecipeName(this, recipe.getName());
+
+        // Start service to update widget to show ingredients for the newly selected recipe
+        Log.i(TAG, "updating widget");
+        WidgetUpdateService.startWidgetUpdate(this);
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.widget.RemoteViewsService;
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.model.Ingredient;
 import com.example.android.bakebetter.repository.RecipeRepository;
+import com.example.android.bakebetter.utils.PreferenceUtil;
 
 import java.util.List;
 
@@ -20,9 +21,7 @@ public class RecipeWidgetService extends RemoteViewsService {
     public static final String TAG = "RecipeWidgetService";
 
     static final String EXTRA_WIDGET_ID = "widget_id";
-    static final String RECIPE_ID = "recipe_id";
 
-    // Probably a bad idea to do it this way
     @Inject
     public RecipeRepository mRepo;
 
@@ -36,12 +35,10 @@ public class RecipeWidgetService extends RemoteViewsService {
         private Context mContext;
         private int mAppWidgetId;
         private List<Ingredient> mIngredients;
-        private Long mRecipeId;
 
         public IngredientsGridFactory(Context context, Intent intent) {
             mContext = context;
             mAppWidgetId = intent.getIntExtra(EXTRA_WIDGET_ID, -1);
-            mRecipeId = intent.getLongExtra(RECIPE_ID, -1L);
         }
 
         @Override
@@ -51,8 +48,10 @@ public class RecipeWidgetService extends RemoteViewsService {
 
         @Override
         public void onDataSetChanged() {
-            if (mRecipeId != -1L) {
-                mIngredients = mRepo.getIngredientsSync(mRecipeId);
+            Long recipeId = PreferenceUtil.getCurrentRecipeId(mContext);
+            Log.i(TAG, "recipe id =" + recipeId);
+            if (recipeId != -1L) {
+                mIngredients = mRepo.getIngredientsSync(recipeId);
             }
         }
 
@@ -69,7 +68,6 @@ public class RecipeWidgetService extends RemoteViewsService {
         @Override
         public RemoteViews getViewAt(int position) {
             Ingredient ingredient = mIngredients.get(position);
-            Log.i(TAG, "postion = " + position + "ingredient = " + ingredient.getIngredient());
             RemoteViews rv = new RemoteViews(mContext.getPackageName(),
                     R.layout.item_ingredients_widget);
             rv.setTextViewText(R.id.widgetIngredientQuantityTextView, "" + ingredient.getQuantity());

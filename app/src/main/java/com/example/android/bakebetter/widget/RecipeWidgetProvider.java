@@ -10,6 +10,7 @@ import android.widget.RemoteViews;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.activities.MainActivity;
+import com.example.android.bakebetter.utils.PreferenceUtil;
 
 /**
  * Implementation of App Widget functionality.
@@ -17,17 +18,19 @@ import com.example.android.bakebetter.activities.MainActivity;
 public class RecipeWidgetProvider extends AppWidgetProvider {
     private static final String TAG = "RecipeWidgetProvider";
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, Long recipeId,
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.recipe_widget_provider);
+        String recipeName = PreferenceUtil.getCurrentRecipeName(context);
+        Log.i(TAG, "recipe name =" + recipeName);
+        views.setTextViewText(R.id.recipeWidgetNameTextView, recipeName);
 
         Log.i(TAG, "updating widget with id: " + appWidgetId);
         // Setting remote adapter
         Intent ingredientsStackIntent = new Intent(context, RecipeWidgetService.class);
         ingredientsStackIntent.putExtra(RecipeWidgetService.EXTRA_WIDGET_ID, appWidgetId);
-        ingredientsStackIntent.putExtra(RecipeWidgetService.RECIPE_ID, recipeId);
         views.setRemoteAdapter(R.id.recipeWidgetGridView, ingredientsStackIntent);
         views.setEmptyView(R.id.recipeWidgetGridView, R.id.emptyWidgetTextView);
 
@@ -41,16 +44,16 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
     }
 
     public static void updateRecipeWidgets(Context context, AppWidgetManager appWidgetManager,
-                                           Long recipeId, int[] appWidgetIds) {
+                                            int[] appWidgetIds) {
         for (int appWidgetId: appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, recipeId, appWidgetId);
+            updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        //WidgetUpdateService.startWidgetUpdate(context);
+        WidgetUpdateService.startWidgetUpdate(context);
     }
 
     @Override

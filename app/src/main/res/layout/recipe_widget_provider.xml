@@ -1,29 +1,44 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#09C"
+    android:background="@color/colorWhite"
     android:padding="@dimen/widget_margin">
 
-    <GridView
-        android:id="@+id/recipeWidgetGridView"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:numColumns="1"/>
+        android:layout_margin="@dimen/default_margin">
+
+        <TextView
+            android:id="@+id/recipeWidgetNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/default_margin"
+            android:textSize="15sp"/>
+
+        <GridView
+            android:id="@+id/recipeWidgetGridView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:numColumns="1"/>
 
 
-    <TextView
-        android:id="@+id/emptyWidgetTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
-        android:background="#09C"
-        android:contentDescription="@string/appwidget_text"
-        android:text="Empty"
-        android:textColor="#ffffff"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
+        <TextView
+            android:id="@+id/emptyWidgetTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="8dp"
+            android:background="#09C"
+            android:contentDescription="@string/appwidget_text"
+            android:text="Empty"
+            android:textColor="#ffffff"
+            android:textSize="24sp"
+            android:textStyle="bold|italic" />
 
+    </LinearLayout>
 </FrameLayout>
