@@ -4,10 +4,14 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_recipe_step">RecipeStepActivity</string>
+    <string name="toast_error_message">Content failed to load. Please check your internet connection if this problem persists</string>
 
     <!-- Recipe Step Activity -->
     <string name="ingredients_tab_title">Ingredients</string>
     <string name="steps_tab_title">Steps</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+
+    <!-- RecipeDetailsActivity -->
+    <string name="toast_swipe_message">Swipe left and right to view other steps</string>
 </resources>

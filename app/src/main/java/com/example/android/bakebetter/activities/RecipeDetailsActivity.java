@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.StepsPageAdapter;
@@ -62,7 +63,14 @@ public class RecipeDetailsActivity extends AppCompatActivity implements HasSuppo
         model.getSteps().observe(this, steps -> {
             if (steps != null) {
                 this.mSteps = steps;
+                // Tells User how to navigate through the different steps for the recipe
+                Toast.makeText(this,getString(R.string.toast_swipe_message),
+                        Toast.LENGTH_SHORT).show();
                 setupViewPager();
+            } else {
+                Toast.makeText(this, getString(R.string.toast_error_message),
+                        Toast.LENGTH_LONG).show();
+                finish();
             }
         });
     }

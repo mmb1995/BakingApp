@@ -8,6 +8,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,8 +41,8 @@ public class RecipeDetailsFragment extends Fragment {
     private static final String TAG = "RecipeDetailsFragment";
 
     private static final String ARG_RECIPE_STEP = "step";
-    private static final Boolean ENABLE_AUTOPLAY = true;
     private static final String BUNDLE_VIDEO_POSITION = "videoPosition";
+    private static final String BUNDLE_SET_PLAY_WHEN_READY = "set_play_when_ready";
 
     @BindView(R.id.recipeStepTitle)
     TextView mTitleTextView;
@@ -58,6 +59,8 @@ public class RecipeDetailsFragment extends Fragment {
     private SimpleExoPlayer mExoPlayer;
     private Step mStep;
     private long mVideoPosition = -1;
+    private boolean mSetPlayWhenReady;
+    private boolean mIsVisible; // Determines if fragment is visible on screen
 
 
     public RecipeDetailsFragment() {
@@ -83,7 +86,11 @@ public class RecipeDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mStep = getArguments().getParcelable(ARG_RECIPE_STEP);
-            mVideoPosition = getArguments().getLong(BUNDLE_VIDEO_POSITION);
+        }
+
+        if (savedInstanceState != null) {
+            mVideoPosition = savedInstanceState.getLong(BUNDLE_VIDEO_POSITION);
+            mSetPlayWhenReady = savedInstanceState.getBoolean(BUNDLE_SET_PLAY_WHEN_READY);
         }
     }
 
@@ -118,8 +125,8 @@ public class RecipeDetailsFragment extends Fragment {
         super.onResume();
         if (mExoPlayer != null) {
             // Resume the video where the user left off
+            mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
             mExoPlayer.seekTo(mVideoPosition);
-            mExoPlayer.setPlayWhenReady(ENABLE_AUTOPLAY);
         } else {
             initializePlayer();;
         }
@@ -128,10 +135,7 @@ public class RecipeDetailsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mExoPlayer != null) {
-            savePlayerState();
-            releasePlayer();
-        }
+        releasePlayer();
     }
 
     @Override
@@ -147,18 +151,23 @@ public class RecipeDetailsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        releasePlayer();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(BUNDLE_VIDEO_POSITION, mVideoPosition);
+        outState.putBoolean(BUNDLE_SET_PLAY_WHEN_READY, mSetPlayWhenReady);
     }
 
     /**
      * Displays the video associated with the recipe if the phone is in landscape orientation
      */
     private void setUpVideoPlayer() {
-        if (getContext().getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE
-                && !getContext().getResources().getBoolean(R.bool.isTablet)) {
+        if (isFullScreen()) {
             // This means the phone is in landscape orientation and should display the video in fullscreen
             hideSystemUI();
             showVideoInFullScreen();
@@ -166,24 +175,35 @@ public class RecipeDetailsFragment extends Fragment {
         initializePlayer();
     }
 
+    private boolean isFullScreen() {
+        return getContext().getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE
+                && !getContext().getResources().getBoolean(R.bool.isTablet);
+    }
+
     private void initializePlayer() {
         if (mExoPlayer == null && mPlayerView.getVisibility() != View.GONE) {
             Uri mediaUri = Uri.parse(mStep.getVideoURL());
+
             // Creates an instance of the ExoPlayer
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
             mPlayerView.setPlayer(mExoPlayer);
+            Log.i(TAG, "autoplay: " + mSetPlayWhenReady);
+            mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
+
             // Prepare the MediaSource
             String userAgent = Util.getUserAgent(getActivity(), "BakeBetter");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
+
+            // Prepare the Exoplayer
+            mExoPlayer.prepare(mediaSource);
             if (mVideoPosition != -1) {
                 // Resumes video play if applicable
                 mExoPlayer.seekTo(mVideoPosition);
             }
-            mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(ENABLE_AUTOPLAY);
         }
     }
 
@@ -192,6 +212,7 @@ public class RecipeDetailsFragment extends Fragment {
      */
     private void releasePlayer() {
         if (mExoPlayer != null) {
+            savePlayerState();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -202,7 +223,6 @@ public class RecipeDetailsFragment extends Fragment {
      * Used by the Viewpager to ensure assets are released when the user swipes
      */
     public void loseFocus() {
-        savePlayerState();
         releasePlayer();
     }
 
@@ -216,6 +236,7 @@ public class RecipeDetailsFragment extends Fragment {
     private void savePlayerState() {
         if (mExoPlayer != null) {
             mVideoPosition = mExoPlayer.getCurrentPosition();
+            mSetPlayWhenReady = mExoPlayer.getPlayWhenReady();
         }
     }
 

@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.IngredientsAdapter;
@@ -34,6 +36,8 @@ public class RecipeIngredientsFragment extends Fragment {
 
     @BindView(R.id.recipe_ingredient_recycler_view)
     RecyclerView mIngredientRecyclerView;
+    @BindView(R.id.ingredients_progress_bar)
+    ProgressBar mIngredientsProgressBar;
 
     @Inject
     public FactoryViewModel mFactoryViewModel;
@@ -84,8 +88,14 @@ public class RecipeIngredientsFragment extends Fragment {
 
         // sets up observer and callback
         model.getIngredients().observe(this, ingredients -> {
-            IngredientsAdapter adapter = new IngredientsAdapter(getContext(), ingredients);
-            mIngredientRecyclerView.setAdapter(adapter);
+            mIngredientsProgressBar.setVisibility(View.GONE);
+            if (ingredients != null) {
+                IngredientsAdapter adapter = new IngredientsAdapter(getContext(), ingredients);
+                mIngredientRecyclerView.setAdapter(adapter);
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.toast_error_message),
+                        Toast.LENGTH_LONG).show();
+            }
         });
     }
 

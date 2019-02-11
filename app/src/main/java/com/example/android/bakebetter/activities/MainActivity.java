@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeGalleryAdapter;
@@ -100,10 +101,14 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
         // Set up the Observer
         model.getRecipes().observe(this, recipes -> {
+            mProgressBar.setVisibility(View.GONE);
             if (recipes != null) {
                 Log.i(TAG, "Received recipes");
-                mProgressBar.setVisibility(View.GONE);
                 mAdapter.setRecipesList(recipes);
+            } else {
+                // There was an error loading the recipes
+                Toast.makeText(this, getString(R.string.toast_error_message),
+                        Toast.LENGTH_LONG).show();
             }
         });
     }

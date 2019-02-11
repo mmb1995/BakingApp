@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeStepAdapter;
@@ -39,6 +41,8 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
 
     @BindView(R.id.recipe_step_recycler_view)
     RecyclerView mStepRecyclerView;
+    @BindView(R.id.steps_progress_bar)
+    ProgressBar mStepsProgressBar;
 
     @Inject
     public FactoryViewModel mFactoryViewModel;
@@ -115,8 +119,14 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
 
         // Set up Observer and callback
         model.getSteps().observe(this, steps -> {
-            mAdapter = new RecipeStepAdapter(getContext(), steps, this);
-            mStepRecyclerView.setAdapter(mAdapter);
+            mStepsProgressBar.setVisibility(View.GONE);
+            if (steps != null) {
+                mAdapter = new RecipeStepAdapter(getContext(), steps, this);
+                mStepRecyclerView.setAdapter(mAdapter);
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.toast_error_message),
+                        Toast.LENGTH_LONG).show();
+            }
         });
     }
 }
