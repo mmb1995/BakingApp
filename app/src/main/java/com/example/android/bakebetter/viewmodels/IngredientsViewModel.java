@@ -15,7 +15,7 @@ public class IngredientsViewModel extends ViewModel {
     private static final String TAG = "IngredientsViewModel";
 
     private LiveData<List<Ingredient>> ingredients;
-    private RecipeRepository mRepository;
+    private final RecipeRepository mRepository;
 
     @Inject
     public IngredientsViewModel(RecipeRepository repository) {

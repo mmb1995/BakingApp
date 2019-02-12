@@ -3,8 +3,9 @@ package com.example.android.bakebetter.fragments;
 
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,8 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,7 +103,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_recipe_details, container, false);
@@ -146,7 +149,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
             mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
             mExoPlayer.seekTo(mVideoPosition);
         } else {
-            initializePlayer();;
+            initializePlayer();
         }
     }
 
@@ -175,7 +178,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(BUNDLE_VIDEO_POSITION, mVideoPosition);
         outState.putBoolean(BUNDLE_SET_PLAY_WHEN_READY, mSetPlayWhenReady);
@@ -194,7 +197,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
     }
 
     private boolean isFullScreen() {
-        return getContext().getResources().getConfiguration().orientation
+        return Objects.requireNonNull(getContext()).getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE
                 && !getContext().getResources().getBoolean(R.bool.isTablet);
     }
@@ -202,7 +205,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
     private void initializePlayer() {
         if (mExoPlayer == null && mPlayerView.getVisibility() != View.GONE) {
             // Check for Internet connection
-            if (!ConnectivityHelper.isConnected(getContext())) {
+            if (!ConnectivityHelper.isConnected(Objects.requireNonNull(getContext()))) {
                 displayErrorMessage();
             } else {
                 // Set up Exoplayer
@@ -219,7 +222,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
                 // Prepare the MediaSource
                 String userAgent = Util.getUserAgent(getActivity(), "BakeBetter");
                 MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
-                        getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
+                        Objects.requireNonNull(getActivity()), userAgent), new DefaultExtractorsFactory(), null, null);
 
                 // Prepare the Exoplayer
                 mExoPlayer.prepare(mediaSource);
@@ -269,12 +272,14 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
      */
     private void hideSystemUI() {
         // hide the action bar
-        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+        Objects.requireNonNull(((AppCompatActivity) Objects.requireNonNull(getActivity())).getSupportActionBar()).hide();
 
-        getActivity().getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getActivity().getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
 
     }
 
@@ -286,9 +291,9 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
         mDescriptionCardView.setVisibility(View.GONE);
 
         // Enable fullscreen
-        ViewGroup.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
-        params.width = params.MATCH_PARENT;
-        params.height = params.MATCH_PARENT;
+        ViewGroup.LayoutParams params = mPlayerView.getLayoutParams();
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         mPlayerView.setLayoutParams(params);
     }
 
@@ -297,7 +302,7 @@ public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayo
      */
     @Override
     public void onRefresh() {
-        if (ConnectivityHelper.isConnected(getContext())) {
+        if (ConnectivityHelper.isConnected(Objects.requireNonNull(getContext()))) {
             setUpVideoPlayer();
             setUpUi();
             mSwipeRefresh.setRefreshing(false);

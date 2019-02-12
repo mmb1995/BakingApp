@@ -11,7 +11,7 @@ public class PreferenceUtil {
     private static final Long RECIPE_ID_DEFAULT = -1L;
     private static final String RECIPE_NAME_DEFAULT ="Ingredients";
 
-    public static final Long getCurrentRecipeId(@NonNull Context context) {
+    public static Long getCurrentRecipeId(@NonNull Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getLong(RECIPE_ID, RECIPE_ID_DEFAULT);
     }
@@ -23,7 +23,7 @@ public class PreferenceUtil {
         editor.apply();
     }
 
-    public static final String getCurrentRecipeName(@NonNull Context context) {
+    public static String getCurrentRecipeName(@NonNull Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getString(RECIPE_NAME, RECIPE_NAME_DEFAULT);
     }

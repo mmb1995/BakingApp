@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 
 public class RecipeWidgetService extends RemoteViewsService {
-    public static final String TAG = "RecipeWidgetService";
+    private static final String TAG = "RecipeWidgetService";
 
     static final String EXTRA_WIDGET_ID = "widget_id";
 
@@ -32,8 +32,8 @@ public class RecipeWidgetService extends RemoteViewsService {
     }
 
     private class IngredientsGridFactory implements RemoteViewsService.RemoteViewsFactory {
-        private Context mContext;
-        private int mAppWidgetId;
+        private final Context mContext;
+        private final int mAppWidgetId;
         private List<Ingredient> mIngredients;
 
         public IngredientsGridFactory(Context context, Intent intent) {

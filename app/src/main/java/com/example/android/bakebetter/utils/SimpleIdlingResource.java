@@ -3,6 +3,7 @@ package com.example.android.bakebetter.utils;
 import android.support.annotation.Nullable;
 import android.support.test.espresso.IdlingResource;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -13,7 +14,7 @@ public class SimpleIdlingResource implements IdlingResource {
     private volatile ResourceCallback mCallback;
 
     // Idleness is controlled with this boolean.
-    private AtomicBoolean mIsIdleNow = new AtomicBoolean(true);
+    private final AtomicBoolean mIsIdleNow = new AtomicBoolean(true);
 
     @Override
     public String getName() {
@@ -37,7 +38,7 @@ public class SimpleIdlingResource implements IdlingResource {
     public void setIdleState(boolean isIdleNow) {
         mIsIdleNow.set(isIdleNow);
         if (isIdleNow && mCallback != null) {
-            mCallback.onTransitionToIdle();
+            Objects.requireNonNull(mCallback).onTransitionToIdle();
         }
     }
 }

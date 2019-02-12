@@ -55,13 +55,12 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
     private RecipeGalleryAdapter mAdapter;
 
-    /**
-     * Only for Espresso testing
-     */
-
     @Nullable
     private SimpleIdlingResource mIdlingResource;
 
+    /**
+     * Only for Espresso testing
+     */
     @VisibleForTesting
     @NonNull
     public IdlingResource getIdlingResource() {
@@ -70,10 +69,6 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
         }
         return mIdlingResource;
     }
-
-    /**
-     *
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,19 +83,11 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
         }
 
         // Check phone configuration
-        if (getResources().getBoolean(R.bool.isTablet)) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
-                this.mRecyclerView.setLayoutManager(layoutManager);
-            } else {
-                GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
-                this.mRecyclerView.setLayoutManager(layoutManager);
-            }
-        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
             this.mRecyclerView.setLayoutManager(layoutManager);
         } else {
-            // Not a tablet and phone is in landscape orientation
+            // landscape orientation
             GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
             this.mRecyclerView.setLayoutManager(layoutManager);
         }

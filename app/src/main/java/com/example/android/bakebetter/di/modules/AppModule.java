@@ -13,7 +13,6 @@ import dagger.Provides;
         DatabaseModule.class,
         RepositoryModule.class
 })
-
 public class AppModule {
     private Application application;
 

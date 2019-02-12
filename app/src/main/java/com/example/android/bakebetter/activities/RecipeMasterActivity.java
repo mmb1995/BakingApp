@@ -1,7 +1,6 @@
 package com.example.android.bakebetter.activities;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -20,6 +19,8 @@ import com.example.android.bakebetter.fragments.RecipeDetailsFragment;
 import com.example.android.bakebetter.fragments.RecipeIngredientsFragment;
 import com.example.android.bakebetter.fragments.RecipeStepListFragment;
 import com.example.android.bakebetter.model.Step;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -61,21 +62,17 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
         // Get the data passed in from the starting intent
         this.mRecipeId = getIntent().getLongExtra(ARG_RECIPE_ID, 0);
 
+        // Check for phone type
         if (getResources().getBoolean(R.bool.isTablet)) {
             mTwoPane = true;
-            mIngredientsButton.setOnClickListener(view -> {
-                addIngredientsFragment();
-            });
+            Objects.requireNonNull(mIngredientsButton).setOnClickListener(view -> addIngredientsFragment());
 
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                // Phone is a Tablet and is in Landscape orientation
-                if (savedInstanceState == null) {
-                    addIngredientsFragment();
-                    addStepsFragments();
-                }
-            } else {
-                // TODO
+            // Check if this is the first run
+            if (savedInstanceState == null) {
+                addIngredientsFragment();
+                addStepsFragments();
             }
+
         } else {
             // Phone is not a tablet
             setUpViewPager();
@@ -88,7 +85,7 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         // hide ingredients button
-        mIngredientsButton.setVisibility(View.INVISIBLE);
+        Objects.requireNonNull(mIngredientsButton).setVisibility(View.INVISIBLE);
 
         // check if there is already a fragment present
         if (fragmentManager.findFragmentById(R.id.detailsFrameLayout) == null) {
@@ -127,8 +124,8 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
     private void setUpViewPager() {
         RecipeStepsActivityPageAdapter mPageAdapter = new RecipeStepsActivityPageAdapter(this,
                 getSupportFragmentManager(), mRecipeId);
-        mViewPager.setAdapter(mPageAdapter);
-        mTabLayout.setupWithViewPager(mViewPager);
+        Objects.requireNonNull(mViewPager).setAdapter(mPageAdapter);
+        Objects.requireNonNull(mTabLayout).setupWithViewPager(mViewPager);
     }
 
 
@@ -142,7 +139,7 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
         if (mTwoPane) {
             // Following Master/Detail pattern
             Log.i(TAG, "In two pane mode and adding details fragment");
-            mIngredientsButton.setVisibility(View.VISIBLE);
+            Objects.requireNonNull(mIngredientsButton).setVisibility(View.VISIBLE);
             updateDetailsFragment(step);
         } else {
             // Since we are not on a Tablet create an intent to launch the RecipeDetailsActivity

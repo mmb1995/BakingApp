@@ -15,7 +15,7 @@ public class StepsViewModel extends ViewModel {
     private static final String TAG = "StepsViewModel";
 
     private LiveData<List<Step>> steps;
-    private RecipeRepository mRepository;
+    private final RecipeRepository mRepository;
 
     @Inject
     public StepsViewModel(RecipeRepository repository) {

@@ -29,7 +29,6 @@ public class RecipeDetailsActivity extends AppCompatActivity implements HasSuppo
     private static final String TAG = "RecipeDetailsActivity";
     private static final String ARG_STEP_ID = "stepId";
     private static final String ARG_RECIPE_ID = "recipeId";
-    private int mStepId;
     private int mCurrentStepIndex;
     private List<Step> mSteps;
 
@@ -110,7 +109,7 @@ public class RecipeDetailsActivity extends AppCompatActivity implements HasSuppo
     }
 
     private int getCurrentStepIndex() {
-        mStepId = getIntent().getIntExtra(ARG_STEP_ID, 0);
+        int mStepId = getIntent().getIntExtra(ARG_STEP_ID, 0);
         for (int i = 0; i < mSteps.size(); i++) {
             if (mSteps.get(i).stepId == mStepId) {
                 return i;

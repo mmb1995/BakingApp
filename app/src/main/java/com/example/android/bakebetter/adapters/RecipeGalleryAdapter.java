@@ -52,27 +52,10 @@ public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdap
         holder.mNameTextView.setText(currentRecipe.getName());
         holder.mServingsTextView.setText("" + currentRecipe.getServings() + " servings");
 
-        // Get resource for id
-        //int resId = resIds[currentRecipe.getId().intValue()];
-
         Picasso.get()
                 .load(R.drawable.baking_image)
                 .into(holder.mGalleryImageView);
 
-        /**
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                    Blurry.with(mContext)
-                            .radius(RecipeUtils.RADIUS_BLUR)
-                            .sampling(RecipeUtils.SAMPLING_BLUR)
-                            .animate(RecipeUtils.ANIMATE_BLUR)
-                            .async()
-                            .capture(holder.mConstraintLayout)
-                            .into(holder.mGalleryImageView);
-                }
-        }, RecipeUtils.MILLISECOND_TO_BLUR);
-      **/
     }
 
     @Override

@@ -21,8 +21,8 @@ import butterknife.ButterKnife;
 public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.RecipeStepViewHolder> {
     private static final String TAG = "RecipeStepAdapter";
 
-    private List<Step> mStepsList;
-    private Context mContext;
+    private final List<Step> mStepsList;
+    private final Context mContext;
     private final RecipeStepClickListener mListener;
 
     public RecipeStepAdapter(Context context, List<Step> steps, RecipeStepClickListener listener) {
