@@ -11,7 +11,7 @@ import javax.inject.Inject;
 public class RecipeDetailsViewModel extends ViewModel {
     private static final String TAG = "RecipeDetailsViewModel";
 
-    private RecipeRepository mRepo;
+    private final RecipeRepository mRepo;
     private LiveData<Step> mStep;
 
     @Inject

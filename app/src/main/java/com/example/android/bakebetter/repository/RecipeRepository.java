@@ -1,6 +1,7 @@
 package com.example.android.bakebetter.repository;
 
 import android.arch.lifecycle.LiveData;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.android.bakebetter.database.RecipeDao;
@@ -10,6 +11,7 @@ import com.example.android.bakebetter.model.Step;
 import com.example.android.bakebetter.network.RecipeService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -58,6 +60,15 @@ public class RecipeRepository {
     }
 
     /**
+     * This should only be called by the widget to avoid blocking the main thread
+     * @param recipeId
+     * @return
+     */
+    public List<Ingredient> getIngredientsSync(Long recipeId) {
+        return mRecipeDao.getIngredientsSync(recipeId);
+    }
+
+    /**
      * NOTE VERY DANGEROUS ONLY FOR DEBUGGING REMOVE LATER
      */
     public void nukeTable() {
@@ -90,8 +101,8 @@ public class RecipeRepository {
             if (count == 0) {
                 mWebService.getRecipes().enqueue(new Callback<List<Recipe>>() {
                     @Override
-                    public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
-                        Log.i(TAG,response.body().toString());
+                    public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
+                        Log.i(TAG, Objects.requireNonNull(response.body()).toString());
                         if (response.isSuccessful()) {
                             insertRecipes(response.body());
                             insertIngredients(response.body());
@@ -100,7 +111,7 @@ public class RecipeRepository {
                     }
 
                     @Override
-                    public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                    public void onFailure(@NonNull Call<List<Recipe>> call, @NonNull Throwable t) {
                         // TODO
 
                         t.printStackTrace();

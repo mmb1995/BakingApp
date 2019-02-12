@@ -13,7 +13,7 @@ import com.example.android.bakebetter.model.Step;
 import java.util.List;
 
 public class StepsPageAdapter extends FragmentStatePagerAdapter {
-    private List<Step> stepsList;
+    private final List<Step> stepsList;
     private SparseArray<RecipeDetailsFragment> mFragmentsCache = new SparseArray<>();
 
     public StepsPageAdapter(FragmentManager fm, List<Step> steps) {
@@ -23,7 +23,7 @@ public class StepsPageAdapter extends FragmentStatePagerAdapter {
 
     @NonNull
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
         Object fragment = super.instantiateItem(container, position);
         if (fragment instanceof  RecipeDetailsFragment) {
             mFragmentsCache.append(position, (RecipeDetailsFragment) fragment);
@@ -32,7 +32,7 @@ public class StepsPageAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
         mFragmentsCache.delete(position);
         super.destroyItem(container, position, object);
     }

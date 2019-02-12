@@ -3,13 +3,17 @@ package com.example.android.bakebetter.fragments;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeStepAdapter;
@@ -17,6 +21,8 @@ import com.example.android.bakebetter.interfaces.RecipeStepClickListener;
 import com.example.android.bakebetter.model.Step;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.StepsViewModel;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -38,6 +44,8 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
 
     @BindView(R.id.recipe_step_recycler_view)
     RecyclerView mStepRecyclerView;
+    @BindView(R.id.steps_progress_bar)
+    ProgressBar mStepsProgressBar;
 
     @Inject
     public FactoryViewModel mFactoryViewModel;
@@ -80,7 +88,7 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_recipe_step_list, container, false);
         ButterKnife.bind(this, rootView);
@@ -98,6 +106,7 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
 
     @Override
     public void onRecipeStepClicked(int pos) {
+        Log.i(TAG, "Recipe selected at position: " + pos);
         mCallback.onStepSelected(mAdapter.getRecipeAtPosition(pos));
     }
 
@@ -107,14 +116,20 @@ public class RecipeStepListFragment extends Fragment implements RecipeStepClickL
     }
 
     private void configureSteps() {
-        StepsViewModel model = ViewModelProviders.of(getActivity(), mFactoryViewModel)
+        StepsViewModel model = ViewModelProviders.of(Objects.requireNonNull(getActivity()), mFactoryViewModel)
                 .get(StepsViewModel.class);
         model.init(mRecipeId);
 
         // Set up Observer and callback
         model.getSteps().observe(this, steps -> {
-            mAdapter = new RecipeStepAdapter(getContext(), steps, this);
-            mStepRecyclerView.setAdapter(mAdapter);
+            mStepsProgressBar.setVisibility(View.GONE);
+            if (steps != null) {
+                mAdapter = new RecipeStepAdapter(getContext(), steps, this);
+                mStepRecyclerView.setAdapter(mAdapter);
+            } else {
+                Toast.makeText(getActivity(), getString(R.string.toast_error_message),
+                        Toast.LENGTH_LONG).show();
+            }
         });
     }
 }

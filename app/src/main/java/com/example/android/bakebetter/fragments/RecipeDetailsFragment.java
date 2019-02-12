@@ -3,18 +3,23 @@ package com.example.android.bakebetter.fragments;
 
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.model.Step;
+import com.example.android.bakebetter.utils.ConnectivityHelper;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -28,6 +33,8 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -36,12 +43,12 @@ import butterknife.ButterKnife;
  * Use the {@link RecipeDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecipeDetailsFragment extends Fragment {
+public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "RecipeDetailsFragment";
 
     private static final String ARG_RECIPE_STEP = "step";
-    private static final Boolean ENABLE_AUTOPLAY = true;
     private static final String BUNDLE_VIDEO_POSITION = "videoPosition";
+    private static final String BUNDLE_SET_PLAY_WHEN_READY = "set_play_when_ready";
 
     @BindView(R.id.recipeStepTitle)
     TextView mTitleTextView;
@@ -55,9 +62,13 @@ public class RecipeDetailsFragment extends Fragment {
     @BindView(R.id.cardView)
     CardView mDescriptionCardView;
 
+    @BindView(R.id.details_swipe_refresh)
+    SwipeRefreshLayout mSwipeRefresh;
+
     private SimpleExoPlayer mExoPlayer;
     private Step mStep;
     private long mVideoPosition = -1;
+    private boolean mSetPlayWhenReady;
 
 
     public RecipeDetailsFragment() {
@@ -83,19 +94,23 @@ public class RecipeDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mStep = getArguments().getParcelable(ARG_RECIPE_STEP);
-            mVideoPosition = getArguments().getLong(BUNDLE_VIDEO_POSITION);
+        }
+
+        if (savedInstanceState != null) {
+            mVideoPosition = savedInstanceState.getLong(BUNDLE_VIDEO_POSITION);
+            mSetPlayWhenReady = savedInstanceState.getBoolean(BUNDLE_SET_PLAY_WHEN_READY);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_recipe_details, container, false);
         ButterKnife.bind(this, rootView);
-        mTitleTextView.setText(mStep.getShortDescription());
-        mContentTextView.setText(mStep.getDescription());
+        mSwipeRefresh.setOnRefreshListener(this);
 
+        // Check if there is a video to play
         if (mStep.getVideoURL() != null && !mStep.getVideoURL().equals("")) {
             // There is a video
             setUpVideoPlayer();
@@ -104,7 +119,20 @@ public class RecipeDetailsFragment extends Fragment {
             mPlayerView.setVisibility(View.GONE);
         }
 
+        setUpUi();
         return rootView;
+    }
+
+    /**
+     * Display details about the current step
+     */
+    private void setUpUi() {
+        if (!isFullScreen() && mStep != null) {
+            mTitleTextView.setText(mStep.getShortDescription());
+            mContentTextView.setText(mStep.getDescription());
+        } else {
+            mDescriptionCardView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -118,20 +146,17 @@ public class RecipeDetailsFragment extends Fragment {
         super.onResume();
         if (mExoPlayer != null) {
             // Resume the video where the user left off
+            mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
             mExoPlayer.seekTo(mVideoPosition);
-            mExoPlayer.setPlayWhenReady(ENABLE_AUTOPLAY);
         } else {
-            initializePlayer();;
+            initializePlayer();
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mExoPlayer != null) {
-            savePlayerState();
-            releasePlayer();
-        }
+        releasePlayer();
     }
 
     @Override
@@ -147,17 +172,23 @@ public class RecipeDetailsFragment extends Fragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onDestroyView() {
+        super.onDestroyView();
+        releasePlayer();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(BUNDLE_VIDEO_POSITION, mVideoPosition);
+        outState.putBoolean(BUNDLE_SET_PLAY_WHEN_READY, mSetPlayWhenReady);
     }
 
     /**
      * Displays the video associated with the recipe if the phone is in landscape orientation
      */
     private void setUpVideoPlayer() {
-        if (getContext().getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE) {
+        if (isFullScreen()) {
             // This means the phone is in landscape orientation and should display the video in fullscreen
             hideSystemUI();
             showVideoInFullScreen();
@@ -165,24 +196,41 @@ public class RecipeDetailsFragment extends Fragment {
         initializePlayer();
     }
 
+    private boolean isFullScreen() {
+        return Objects.requireNonNull(getContext()).getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE
+                && !getContext().getResources().getBoolean(R.bool.isTablet);
+    }
+
     private void initializePlayer() {
         if (mExoPlayer == null && mPlayerView.getVisibility() != View.GONE) {
-            Uri mediaUri = Uri.parse(mStep.getVideoURL());
-            // Creates an instance of the ExoPlayer
-            TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
-            mPlayerView.setPlayer(mExoPlayer);
-            // Prepare the MediaSource
-            String userAgent = Util.getUserAgent(getActivity(), "BakeBetter");
-            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
-                    getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
-            if (mVideoPosition != -1) {
-                // Resumes video play if applicable
-                mExoPlayer.seekTo(mVideoPosition);
+            // Check for Internet connection
+            if (!ConnectivityHelper.isConnected(Objects.requireNonNull(getContext()))) {
+                displayErrorMessage();
+            } else {
+                // Set up Exoplayer
+                Uri mediaUri = Uri.parse(mStep.getVideoURL());
+
+                // Creates an instance of the ExoPlayer
+                TrackSelector trackSelector = new DefaultTrackSelector();
+                LoadControl loadControl = new DefaultLoadControl();
+                mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
+                mPlayerView.setPlayer(mExoPlayer);
+                Log.i(TAG, "autoplay: " + mSetPlayWhenReady);
+                mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
+
+                // Prepare the MediaSource
+                String userAgent = Util.getUserAgent(getActivity(), "BakeBetter");
+                MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
+                        Objects.requireNonNull(getActivity()), userAgent), new DefaultExtractorsFactory(), null, null);
+
+                // Prepare the Exoplayer
+                mExoPlayer.prepare(mediaSource);
+                if (mVideoPosition != -1) {
+                    // Resumes video play if applicable
+                    mExoPlayer.seekTo(mVideoPosition);
+                }
             }
-            mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(ENABLE_AUTOPLAY);
         }
     }
 
@@ -191,6 +239,7 @@ public class RecipeDetailsFragment extends Fragment {
      */
     private void releasePlayer() {
         if (mExoPlayer != null) {
+            savePlayerState();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;
@@ -201,7 +250,6 @@ public class RecipeDetailsFragment extends Fragment {
      * Used by the Viewpager to ensure assets are released when the user swipes
      */
     public void loseFocus() {
-        savePlayerState();
         releasePlayer();
     }
 
@@ -215,6 +263,7 @@ public class RecipeDetailsFragment extends Fragment {
     private void savePlayerState() {
         if (mExoPlayer != null) {
             mVideoPosition = mExoPlayer.getCurrentPosition();
+            mSetPlayWhenReady = mExoPlayer.getPlayWhenReady();
         }
     }
 
@@ -222,13 +271,15 @@ public class RecipeDetailsFragment extends Fragment {
      * Hides the system ui to allow fullscreen video
      */
     private void hideSystemUI() {
-        // hide the action barout
-        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+        // hide the action bar
+        Objects.requireNonNull(((AppCompatActivity) Objects.requireNonNull(getActivity())).getSupportActionBar()).hide();
 
-        getActivity().getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getActivity().getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
 
     }
 
@@ -240,10 +291,32 @@ public class RecipeDetailsFragment extends Fragment {
         mDescriptionCardView.setVisibility(View.GONE);
 
         // Enable fullscreen
-        ViewGroup.LayoutParams params = (ConstraintLayout.LayoutParams) mPlayerView.getLayoutParams();
-        params.width = params.MATCH_PARENT;
-        params.height = params.MATCH_PARENT;
+        ViewGroup.LayoutParams params = mPlayerView.getLayoutParams();
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         mPlayerView.setLayoutParams(params);
     }
 
+    /**
+     * Checks for an internet connection and tries to reload data if possible
+     */
+    @Override
+    public void onRefresh() {
+        if (ConnectivityHelper.isConnected(Objects.requireNonNull(getContext()))) {
+            setUpVideoPlayer();
+            setUpUi();
+            mSwipeRefresh.setRefreshing(false);
+        } else {
+            mSwipeRefresh.setRefreshing(false);
+            displayErrorMessage();
+        }
+    }
+
+    /**
+     * Inform user that their is no Internet connection available
+     */
+    private void displayErrorMessage() {
+        Toast.makeText(getContext(), R.string.toast_error_no_internet,
+                Toast.LENGTH_LONG).show();
+    }
 }

@@ -3,19 +3,29 @@ package com.example.android.bakebetter.activities;
 import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeGalleryAdapter;
 import com.example.android.bakebetter.model.Recipe;
+import com.example.android.bakebetter.utils.PreferenceUtil;
+import com.example.android.bakebetter.utils.SimpleIdlingResource;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.RecipeListViewModel;
+import com.example.android.bakebetter.widget.WidgetUpdateService;
 
 import javax.inject.Inject;
 
@@ -33,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
     @BindView(R.id.main_progress_bar)
     ProgressBar mProgressBar;
+
     @BindView(R.id.recipes_rv)
     RecyclerView mRecyclerView;
 
@@ -44,15 +55,44 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
     private RecipeGalleryAdapter mAdapter;
 
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
+    /**
+     * Only for Espresso testing
+     */
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         AndroidInjection.inject(this);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+
+        // For testing mIdling resource will be null in production
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(false);
+        }
+
+        // Check phone configuration
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            this.mRecyclerView.setLayoutManager(layoutManager);
+        } else {
+            // landscape orientation
+            GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+            this.mRecyclerView.setLayoutManager(layoutManager);
+        }
+
         this.mAdapter = new RecipeGalleryAdapter(this, this);
-        this.mRecyclerView.setLayoutManager(mLayoutManager);
         this.mRecyclerView.setAdapter(mAdapter);
         configureViewModel();
     }
@@ -66,8 +106,11 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     public void onRecipeClicked(int position) {
         Recipe currentRecipe = mAdapter.getRecipeAtPosition(position);
         Log.i(TAG, "recipe =" + currentRecipe.getName());
-        Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeStepActivity.class);
-        startStepsActivityIntent.putExtra(RecipeStepActivity.ARG_RECIPE_ID, currentRecipe.getId());
+        updateSharedPreferencesAndWidget(currentRecipe);
+
+        // Create Intent to launch RecipeMasterActivity
+        Intent startStepsActivityIntent = new Intent(MainActivity.this, RecipeMasterActivity.class);
+        startStepsActivityIntent.putExtra(RecipeMasterActivity.ARG_RECIPE_ID, currentRecipe.getId());
         startActivity(startStepsActivityIntent);
     }
 
@@ -77,16 +120,36 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
         // Set up the Observer
         model.getRecipes().observe(this, recipes -> {
+            mProgressBar.setVisibility(View.GONE);
             if (recipes != null) {
                 Log.i(TAG, "Received recipes");
-                mProgressBar.setVisibility(View.GONE);
                 mAdapter.setRecipesList(recipes);
+            } else {
+                // There was an error loading the recipes
+                Toast.makeText(this, getString(R.string.toast_error_message),
+                        Toast.LENGTH_LONG).show();
+            }
+
+            // For testing only
+            if (mIdlingResource != null) {
+                mIdlingResource.setIdleState(true);
             }
         });
+    }
+
+    private void updateSharedPreferencesAndWidget(Recipe recipe) {
+        // Update shared Preferences
+        PreferenceUtil.setCurrentRecipeId(this, recipe.getId());
+        PreferenceUtil.setCurrentRecipeName(this, recipe.getName());
+
+        // Start service to update widget to show ingredients for the newly selected recipe
+        Log.i(TAG, "updating widget");
+        WidgetUpdateService.startWidgetUpdate(this);
     }
 
     @Override
     public AndroidInjector<Activity> activityInjector() {
         return dispatchingAndroidInjector;
     }
+
 }

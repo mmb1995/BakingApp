@@ -42,7 +42,7 @@
     </style>
 
     <style name="RecipeGalleryTextStyle.ServingsStyle" parent="RecipeGalleryTextStyle">
-        <item name="android:textSize">15dp</item>
+        <item name="android:textSize">15sp</item>
     </style>
 
 </resources>

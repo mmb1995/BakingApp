@@ -4,6 +4,7 @@ import com.example.android.bakebetter.MyApplication;
 import com.example.android.bakebetter.di.modules.ActivityModule;
 import com.example.android.bakebetter.di.modules.AppModule;
 import com.example.android.bakebetter.di.modules.FragmentModule;
+import com.example.android.bakebetter.di.modules.ServiceModule;
 import com.example.android.bakebetter.di.modules.ViewModelModule;
 
 import javax.inject.Singleton;
@@ -17,6 +18,7 @@ import dagger.android.support.AndroidSupportInjectionModule;
         AppModule.class,
         AndroidSupportInjectionModule.class,
         ActivityModule.class,
+        ServiceModule.class,
         FragmentModule.class,
         ViewModelModule.class
 })

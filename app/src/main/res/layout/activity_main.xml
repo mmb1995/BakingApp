@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
-    <ProgressBar
-        style="?android:attr/progressBarStyleLarge"
-        android:id="@+id/main_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recipes_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/recipe_gallery_grid_padding"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recipes_rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/recipe_gallery_grid_padding"/>
-
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:id="@+id/main_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 </android.support.design.widget.CoordinatorLayout>

@@ -23,12 +23,11 @@ public class NetworksModule {
     @Provides
     @Singleton
     Retrofit provideRecipesRetrofit(OkHttpClient okHttpClient) {
-        Retrofit retrofit = new Retrofit.Builder()
+        return new Retrofit.Builder()
                 .baseUrl(RecipeUtils.RECIPE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient)
                 .build();
-        return retrofit;
     }
 
     @Provides

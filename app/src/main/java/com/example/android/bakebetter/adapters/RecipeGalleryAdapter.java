@@ -22,6 +22,7 @@ import butterknife.ButterKnife;
 
 public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdapter.RecipeViewHolder> {
     private static final String TAG = "RecipeGalleryAdapter";
+    //private static final Integer[] resIds = {R.drawable.nutella_pie_image};
     private List<Recipe> mRecipeList;
     private final OnRecipeClickListener mListener;
     private Context mContext;
@@ -55,20 +56,6 @@ public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdap
                 .load(R.drawable.baking_image)
                 .into(holder.mGalleryImageView);
 
-        /**
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                    Blurry.with(mContext)
-                            .radius(RecipeUtils.RADIUS_BLUR)
-                            .sampling(RecipeUtils.SAMPLING_BLUR)
-                            .animate(RecipeUtils.ANIMATE_BLUR)
-                            .async()
-                            .capture(holder.mConstraintLayout)
-                            .into(holder.mGalleryImageView);
-                }
-        }, RecipeUtils.MILLISECOND_TO_BLUR);
-      **/
     }
 
     @Override
