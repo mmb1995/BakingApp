@@ -22,6 +22,7 @@ import butterknife.ButterKnife;
 
 public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdapter.RecipeViewHolder> {
     private static final String TAG = "RecipeGalleryAdapter";
+    //private static final Integer[] resIds = {R.drawable.nutella_pie_image};
     private List<Recipe> mRecipeList;
     private final OnRecipeClickListener mListener;
     private Context mContext;
@@ -50,6 +51,9 @@ public class RecipeGalleryAdapter extends RecyclerView.Adapter<RecipeGalleryAdap
         Log.i(TAG, currentRecipe.getName());
         holder.mNameTextView.setText(currentRecipe.getName());
         holder.mServingsTextView.setText("" + currentRecipe.getServings() + " servings");
+
+        // Get resource for id
+        //int resId = resIds[currentRecipe.getId().intValue()];
 
         Picasso.get()
                 .load(R.drawable.baking_image)

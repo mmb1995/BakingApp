@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import com.example.android.bakebetter.R;
@@ -45,7 +46,7 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
     ViewPager mViewPager;
     @Nullable
     @BindView(R.id.ingredientsButton)
-    Button mIngredientsButton;
+    Button mIngredientsButton; // Only for tablet will be null otherwise
 
     private Long mRecipeId;
     private boolean mTwoPane;
@@ -85,7 +86,9 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
         RecipeIngredientsFragment ingredientsFragment = RecipeIngredientsFragment.newInstance(mRecipeId);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        Log.i(TAG, "ingredients button clicked");
+
+        // hide ingredients button
+        mIngredientsButton.setVisibility(View.INVISIBLE);
 
         // check if there is already a fragment present
         if (fragmentManager.findFragmentById(R.id.detailsFrameLayout) == null) {
@@ -139,6 +142,7 @@ public class RecipeMasterActivity extends AppCompatActivity implements HasSuppor
         if (mTwoPane) {
             // Following Master/Detail pattern
             Log.i(TAG, "In two pane mode and adding details fragment");
+            mIngredientsButton.setVisibility(View.VISIBLE);
             updateDetailsFragment(step);
         } else {
             // Since we are not on a Tablet create an intent to launch the RecipeDetailsActivity

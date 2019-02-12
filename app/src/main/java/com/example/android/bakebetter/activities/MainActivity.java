@@ -5,6 +5,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +22,7 @@ import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.adapters.RecipeGalleryAdapter;
 import com.example.android.bakebetter.model.Recipe;
 import com.example.android.bakebetter.utils.PreferenceUtil;
+import com.example.android.bakebetter.utils.SimpleIdlingResource;
 import com.example.android.bakebetter.viewmodels.FactoryViewModel;
 import com.example.android.bakebetter.viewmodels.RecipeListViewModel;
 import com.example.android.bakebetter.widget.WidgetUpdateService;
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
     @BindView(R.id.main_progress_bar)
     ProgressBar mProgressBar;
+
     @BindView(R.id.recipes_rv)
     RecyclerView mRecyclerView;
 
@@ -49,12 +55,37 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
 
     private RecipeGalleryAdapter mAdapter;
 
+    /**
+     * Only for Espresso testing
+     */
+
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
+
+    /**
+     *
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         AndroidInjection.inject(this);
+
+        // For testing mIdling resource will be null in production
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(false);
+        }
 
         // Check phone configuration
         if (getResources().getBoolean(R.bool.isTablet)) {
@@ -73,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
             GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
             this.mRecyclerView.setLayoutManager(layoutManager);
         }
+
         this.mAdapter = new RecipeGalleryAdapter(this, this);
         this.mRecyclerView.setAdapter(mAdapter);
         configureViewModel();
@@ -110,6 +142,11 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
                 Toast.makeText(this, getString(R.string.toast_error_message),
                         Toast.LENGTH_LONG).show();
             }
+
+            // For testing only
+            if (mIdlingResource != null) {
+                mIdlingResource.setIdleState(true);
+            }
         });
     }
 
@@ -127,4 +164,5 @@ public class MainActivity extends AppCompatActivity implements RecipeGalleryAdap
     public AndroidInjector<Activity> activityInjector() {
         return dispatchingAndroidInjector;
     }
+
 }

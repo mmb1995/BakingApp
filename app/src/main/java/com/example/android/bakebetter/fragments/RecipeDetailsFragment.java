@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -13,9 +14,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.bakebetter.R;
 import com.example.android.bakebetter.model.Step;
+import com.example.android.bakebetter.utils.ConnectivityHelper;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
@@ -37,7 +40,7 @@ import butterknife.ButterKnife;
  * Use the {@link RecipeDetailsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecipeDetailsFragment extends Fragment {
+public class RecipeDetailsFragment extends Fragment implements  SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "RecipeDetailsFragment";
 
     private static final String ARG_RECIPE_STEP = "step";
@@ -55,6 +58,9 @@ public class RecipeDetailsFragment extends Fragment {
 
     @BindView(R.id.cardView)
     CardView mDescriptionCardView;
+
+    @BindView(R.id.details_swipe_refresh)
+    SwipeRefreshLayout mSwipeRefresh;
 
     private SimpleExoPlayer mExoPlayer;
     private Step mStep;
@@ -99,9 +105,9 @@ public class RecipeDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_recipe_details, container, false);
         ButterKnife.bind(this, rootView);
-        mTitleTextView.setText(mStep.getShortDescription());
-        mContentTextView.setText(mStep.getDescription());
+        mSwipeRefresh.setOnRefreshListener(this);
 
+        // Check if there is a video to play
         if (mStep.getVideoURL() != null && !mStep.getVideoURL().equals("")) {
             // There is a video
             setUpVideoPlayer();
@@ -110,7 +116,20 @@ public class RecipeDetailsFragment extends Fragment {
             mPlayerView.setVisibility(View.GONE);
         }
 
+        setUpUi();
         return rootView;
+    }
+
+    /**
+     * Display details about the current step
+     */
+    private void setUpUi() {
+        if (!isFullScreen() && mStep != null) {
+            mTitleTextView.setText(mStep.getShortDescription());
+            mContentTextView.setText(mStep.getDescription());
+        } else {
+            mDescriptionCardView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -182,27 +201,32 @@ public class RecipeDetailsFragment extends Fragment {
 
     private void initializePlayer() {
         if (mExoPlayer == null && mPlayerView.getVisibility() != View.GONE) {
+            // Check for Internet connection
+            if (!ConnectivityHelper.isConnected(getContext())) {
+                displayErrorMessage();
+            } else {
+                // Set up Exoplayer
+                Uri mediaUri = Uri.parse(mStep.getVideoURL());
 
-            Uri mediaUri = Uri.parse(mStep.getVideoURL());
+                // Creates an instance of the ExoPlayer
+                TrackSelector trackSelector = new DefaultTrackSelector();
+                LoadControl loadControl = new DefaultLoadControl();
+                mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
+                mPlayerView.setPlayer(mExoPlayer);
+                Log.i(TAG, "autoplay: " + mSetPlayWhenReady);
+                mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
 
-            // Creates an instance of the ExoPlayer
-            TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
-            mPlayerView.setPlayer(mExoPlayer);
-            Log.i(TAG, "autoplay: " + mSetPlayWhenReady);
-            mExoPlayer.setPlayWhenReady(mSetPlayWhenReady);
+                // Prepare the MediaSource
+                String userAgent = Util.getUserAgent(getActivity(), "BakeBetter");
+                MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
+                        getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
 
-            // Prepare the MediaSource
-            String userAgent = Util.getUserAgent(getActivity(), "BakeBetter");
-            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
-                    getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
-
-            // Prepare the Exoplayer
-            mExoPlayer.prepare(mediaSource);
-            if (mVideoPosition != -1) {
-                // Resumes video play if applicable
-                mExoPlayer.seekTo(mVideoPosition);
+                // Prepare the Exoplayer
+                mExoPlayer.prepare(mediaSource);
+                if (mVideoPosition != -1) {
+                    // Resumes video play if applicable
+                    mExoPlayer.seekTo(mVideoPosition);
+                }
             }
         }
     }
@@ -268,4 +292,26 @@ public class RecipeDetailsFragment extends Fragment {
         mPlayerView.setLayoutParams(params);
     }
 
+    /**
+     * Checks for an internet connection and tries to reload data if possible
+     */
+    @Override
+    public void onRefresh() {
+        if (ConnectivityHelper.isConnected(getContext())) {
+            setUpVideoPlayer();
+            setUpUi();
+            mSwipeRefresh.setRefreshing(false);
+        } else {
+            mSwipeRefresh.setRefreshing(false);
+            displayErrorMessage();
+        }
+    }
+
+    /**
+     * Inform user that their is no Internet connection available
+     */
+    private void displayErrorMessage() {
+        Toast.makeText(getContext(), R.string.toast_error_no_internet,
+                Toast.LENGTH_LONG).show();
+    }
 }
