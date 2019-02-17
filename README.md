@@ -1,5 +1,5 @@
 # BakingApp
-This is the third project as part of the Udacity Android Nanodegree program. This app allows user to view a list of recipes,
+This is the third project for the Udacity Android Nanodegree program. This app allows users to view a list of recipes,
 get ingredient information, and watch videos on how to make the recipe for themselves.
 
 # Third Party Libraries
